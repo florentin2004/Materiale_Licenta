@@ -1,0 +1,3 @@
+LINK: https://whisperpair.eu/
+LINK: https://github.com/aalex954/whisperpair-poc-tool
+LINK: https://github.com/Bazskillz/WhisperPair-PoC?tab=readme-ov-file
