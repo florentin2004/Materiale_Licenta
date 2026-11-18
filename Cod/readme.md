@@ -43,7 +43,3 @@ Câmpurile LMP din cod ar trebui să dea chipul, dar vendorul chipului și subve
 4. **Classic inquiry** opțional, pentru device-uri din jur precum mașinile. Tehnic e un scan activ, deși nu conectează.
 5. **Urmărire în timp** a device-urilor rotative.
 6. **Corectarea potrivirii OUI** pe măști de 28 și 36 de biți, ca producătorul să nu fie atribuit greșit.
-
-Cuvântul „pasiv" are limite: scan-ul în mod `--active-scan` și `--connect` nu mai sunt pasive.
-
-Vrei să încep cu motorul de reguli (`vulnerabilities.json` cu niveluri de încredere) și cu parsarea Fast Pair?
