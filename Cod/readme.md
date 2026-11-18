@@ -1,5 +1,3 @@
-Citind și `Vulnerabilities.docx`, pot răspunde concret.
-
 ## Cum funcționează fluxul din `Program_2.cs`
 
 1. **Pornire.** Se citesc opțiunile din linia de comandă (`--scan`, `--connect`, `--fast` etc.).
