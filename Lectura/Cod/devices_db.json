@@ -1,0 +1,66 @@
+{
+  "189C2CE2AD64": {
+    "MacAddress": "189C2CE2AD64",
+    "Name": "Philips TAT3509",
+    "Vendor": "Dongguan Huayin Electronic Technology Co., Ltd.",
+    "FirstSeen": "2026-11-12T09:48:28.0826684+02:00",
+    "LastConnected": "2026-11-12T09:48:35.3959402+02:00",
+    "ConnectionCount": 2
+  },
+  "64B0E8DDAA74": {
+    "MacAddress": "64B0E8DDAA74",
+    "Name": "HUAWEI FreeBuds 6i",
+    "Vendor": "Huawei",
+    "FirstSeen": "2026-11-12T09:49:45.4579197+02:00",
+    "LastConnected": "2026-11-12T09:49:45.458082+02:00",
+    "ConnectionCount": 1
+  },
+  "88089456AD96": {
+    "MacAddress": "88089456AD96",
+    "Name": "Dime 3",
+    "Vendor": "Skullcandy",
+    "FirstSeen": "2026-11-12T10:10:58.7852358+02:00",
+    "LastConnected": "2026-11-12T10:10:58.7853263+02:00",
+    "ConnectionCount": 1
+  },
+  "6C2F80208B76": {
+    "MacAddress": "6C2F80208B76",
+    "Name": "ANDREEA",
+    "Vendor": "Intel",
+    "FirstSeen": "2026-11-12T10:17:00.7205061+02:00",
+    "LastConnected": "2026-11-12T10:17:00.7207169+02:00",
+    "ConnectionCount": 1
+  },
+  "0CE4A032E41C": {
+    "MacAddress": "0CE4A032E41C",
+    "Name": "HUAWEI WATCH GT 2e-41C",
+    "Vendor": "Huawei",
+    "FirstSeen": "2026-11-12T10:17:25.4789276+02:00",
+    "LastConnected": "2026-11-12T10:17:25.4790315+02:00",
+    "ConnectionCount": 1
+  },
+  "3530D5BB2B90": {
+    "MacAddress": "3530D5BB2B90",
+    "Name": "Air Mini Lite",
+    "Vendor": "Producator Necunoscut",
+    "FirstSeen": "2026-11-12T10:22:18.7462359+02:00",
+    "LastConnected": "2026-11-12T10:22:31.0809863+02:00",
+    "ConnectionCount": 2
+  },
+  "D45B51AEAA98": {
+    "MacAddress": "D45B51AEAA98",
+    "Name": "Tepes",
+    "Vendor": "Lenovo / Motorola Mobility",
+    "FirstSeen": "2026-11-12T10:26:22.8776037+02:00",
+    "LastConnected": "2026-11-12T10:26:22.877782+02:00",
+    "ConnectionCount": 1
+  },
+  "F4FAF3B25546": {
+    "MacAddress": "F4FAF3B25546",
+    "Name": "Fit Watch 5000",
+    "Vendor": "Producator Necunoscut",
+    "FirstSeen": "2026-11-12T10:27:11.2933365+02:00",
+    "LastConnected": "2026-11-12T10:27:24.2210664+02:00",
+    "ConnectionCount": 2
+  }
+}

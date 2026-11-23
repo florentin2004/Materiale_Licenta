@@ -1,0 +1,146 @@
+[
+  {
+    "id": "WHISPERPAIR-GFPS",
+    "cve": "CVE-2025-GFPS",
+    "name": "WhisperPair (Google Fast Pair Pairing-State Bypass)",
+    "category": "Authentication Bypass / Hijack",
+    "defaultConfidence": "Candidat",
+    "elevatedConfidence": "Probabil",
+    "signals": {
+      "serviceUuidPrefixes": [ "0000fe2c", "df21fe2c" ],
+      "companyIds": [ 224 ],
+      "vendorKeywords": [ "Google", "Sony", "JBL", "Jabra", "Marshall", "Soundcore", "OnePlus", "Redmi", "Nothing", "Logitech" ],
+      "namePatterns": []
+    },
+    "evidenceRequiredForActive": "Verificare GATT Model ID + scriere neautentificata pe caracteristica Key-based Pairing cand device-ul nu este in pairing mode.",
+    "remediation": "Actualizare firmware la versiunea cu patch-ul Google Fast Pair (validarea starii discoverable/pairing mode)."
+  },
+  {
+    "id": "AIROHA-RACE-2025",
+    "cve": "CVE-2025-20700",
+    "name": "Airoha RACE Protocol Unauthenticated Access",
+    "category": "Information Disclosure / RCE",
+    "defaultConfidence": "Candidat",
+    "elevatedConfidence": "Probabil",
+    "signals": {
+      "serviceUuidPrefixes": [ "5052494d-2dab-0341-6972-6f6861424c45" ],
+      "companyIds": [ 148 ],
+      "vendorKeywords": [ "Airoha" ],
+      "namePatterns": []
+    },
+    "evidenceRequiredForActive": "Interogare serviciu proprietar Airoha RACE (5052494D-...) si verificare comenzi FOTA/RAM read fara autentificare.",
+    "remediation": "Actualizare SDK/firmware Airoha pentru dezactivarea sau autentificarea interfetei RACE peste BLE/RFCOMM."
+  },
+  {
+    "id": "YAMAHA-SRB30A-UNAUTH",
+    "cve": "CVE-2026-37100",
+    "name": "Yamaha SR-B30A BLE Unauthenticated Control",
+    "category": "Improper Authentication",
+    "defaultConfidence": "Candidat",
+    "elevatedConfidence": "Probabil",
+    "signals": {
+      "serviceUuidPrefixes": [],
+      "companyIds": [ 597 ],
+      "vendorKeywords": [ "Yamaha" ],
+      "namePatterns": [ "SR-B30A", "SR-B" ],
+      "vulnerableFirmwareRegex": "^2\\.40$"
+    },
+    "evidenceRequiredForActive": "Conectare BLE fara bonding (GattAccess=Success) si verificare acces la serviciile proprietare Sound Bar Remote.",
+    "remediation": "Actualizare firmware soundbar peste versiunea 2.40 si activarea autentificarii pe link-ul BLE."
+  },
+  {
+    "id": "REALTEK-RTL8762-DOS",
+    "cve": "CVE-2025-44526",
+    "name": "Realtek RTL8762EKF-EVB BLE SDK LL_Length_Req DoS",
+    "category": "Denial of Service",
+    "defaultConfidence": "NeevaluabilFaraTestActiv",
+    "elevatedConfidence": "Candidat",
+    "signals": {
+      "serviceUuidPrefixes": [],
+      "companyIds": [ 93 ],
+      "vendorKeywords": [ "Realtek" ],
+      "namePatterns": []
+    },
+    "evidenceRequiredForActive": "Identificare exacta a chipului RTL8762 si trimitere pachet LL_LENGTH_REQ malformat pe Link Layer (necesita dongle HCI/nRF52840).",
+    "remediation": "Actualizare Realtek BLE SDK la versiunea cu validare a lungimii PDU la negocierea Data Length Extension."
+  },
+  {
+    "id": "CYPRESS-PSOC4-BLE",
+    "cve": "CVE-2025-44557",
+    "name": "Cypress PSoC4 BLE Stack 3.66 Vulnerability",
+    "category": "Protocol / Pairing Flaw",
+    "defaultConfidence": "NeevaluabilFaraTestActiv",
+    "elevatedConfidence": "Candidat",
+    "signals": {
+      "serviceUuidPrefixes": [],
+      "companyIds": [ 305 ],
+      "vendorKeywords": [ "Cypress", "Infineon" ],
+      "namePatterns": [ "PSoC" ]
+    },
+    "evidenceRequiredForActive": "Confirmare stiva BLE 3.66 si test activ de pairing SMP.",
+    "remediation": "Upgrade la o versiune patch-uita a componentei Cypress/Infineon PSoC4 BLE."
+  },
+  {
+    "id": "NORDIC-NRF-ACCESS-SE",
+    "cve": "CVE-2025-9709 / CVE-2025-67841",
+    "name": "Nordic nRF52810 Access Control / nRF54H20 IronSide SE",
+    "category": "Access Control / Algorithmic Complexity",
+    "defaultConfidence": "NeevaluabilFaraTestActiv",
+    "elevatedConfidence": "Candidat",
+    "signals": {
+      "serviceUuidPrefixes": [],
+      "companyIds": [ 89 ],
+      "vendorKeywords": [ "Nordic" ],
+      "namePatterns": [ "nRF52", "nRF54", "Zephyr" ]
+    },
+    "evidenceRequiredForActive": "Verificare versiune Zephyr/nRF Connect SDK prin caracteristici GATT sau interogare activa pe servicii expuse.",
+    "remediation": "Actualizare nRF Connect SDK / Zephyr RTOS la ultimele patch-uri de securitate Nordic."
+  },
+  {
+    "id": "PERFEKTBLUE-BLUESDK-IVI",
+    "cve": "CVE-2025-PERFEKTBLUE",
+    "name": "PerfektBlue (OpenSynergy BlueSDK Automotive IVI)",
+    "category": "RCE / Classic Stack",
+    "defaultConfidence": "NeevaluabilFaraTestActiv",
+    "elevatedConfidence": "Candidat",
+    "signals": {
+      "serviceUuidPrefixes": [ "0000111e", "0000110b", "0000112f" ],
+      "companyIds": [],
+      "vendorKeywords": [ "Harman", "Continental", "Aptiv", "Bosch", "Visteon", "Panasonic Automotive", "Alpine" ],
+      "namePatterns": [ "IVI", "MBUX", "Sync", "Uconnect", "Car", "Auto", "Infotainment", "MyCar", "VW", "Audi", "BMW", "Skoda", "Renault" ]
+    },
+    "evidenceRequiredForActive": "Classic Inquiry + SDP dump (verificare profiluri HFP/AVRCP/PBAP si comportament L2CAP/RFCOMM).",
+    "remediation": "Aplicare patch OEM pentru stiva OpenSynergy BlueSDK din unitatea infotainment."
+  },
+  {
+    "id": "SWEYNTOOTH-LEGACY-BLE",
+    "cve": "CVE-2019-16336 / SweynTooth",
+    "name": "SweynTooth BLE Link Layer & SMP Crashes / Bypass",
+    "category": "DoS / Security Bypass",
+    "defaultConfidence": "NeevaluabilFaraTestActiv",
+    "elevatedConfidence": "Candidat",
+    "signals": {
+      "serviceUuidPrefixes": [],
+      "companyIds": [ 13, 89, 305, 70 ],
+      "vendorKeywords": [ "Texas Instruments", "NXP", "Dialog", "Microchip", "STMicroelectronics", "Telink", "Cypress", "Nordic" ],
+      "maxLmpVersion": 9,
+      "namePatterns": []
+    },
+    "evidenceRequiredForActive": "Test activ LL/SMP malformat cu nRF52840 dongle (SweynTooth test suite) pe dispozitive BLE 4.0 - 5.0.",
+    "remediation": "Actualizare firmware BLE controller la revizia post-SweynTooth a producatorului SoC."
+  },
+  {
+    "id": "WEAK-PAIRING-OR-OPEN-GATT",
+    "cve": "CWE-287 / CWE-306",
+    "name": "Unauthenticated GATT Exposure or Weak Pairing Protection",
+    "category": "Configuration / Posture",
+    "defaultConfidence": "Probabil",
+    "elevatedConfidence": "Probabil",
+    "signals": {
+      "checkOpenGattWithoutPairing": true,
+      "checkWeakProtectionLevel": true
+    },
+    "evidenceRequiredForActive": "Enumerare caracteristici GATT cu proprietati Read/Write fara criptare sau downgrade Just Works.",
+    "remediation": "Impunere LE Secure Connections (MITM protection) si autentificare la nivel de caracteristica GATT."
+  }
+]
