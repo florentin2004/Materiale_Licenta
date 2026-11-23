@@ -1,0 +1,1296 @@
+<html lang="en-US"><head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="profile" href="http://gmpg.org/xfn/11">
+	<link rel="pingback" href="https://insinuator.net/xmlrpc.php">
+	
+	<link rel="apple-touch-icon" href="https://insinuator.net/wp-content/themes/insinuator2/images/favicons/apple-icon-57x57.png" sizes="57x57">
+  <link rel="apple-touch-icon" href="https://insinuator.net/wp-content/themes/insinuator2/images/favicons/apple-icon-60x60.png" sizes="60x60">
+  <link rel="apple-touch-icon" href="https://insinuator.net/wp-content/themes/insinuator2/images/favicons/apple-icon-72x72.png" sizes="72x72">
+  <link rel="apple-touch-icon" href="https://insinuator.net/wp-content/themes/insinuator2/images/favicons/apple-icon-76x76.png" sizes="76x76">
+  <link rel="apple-touch-icon" href="https://insinuator.net/wp-content/themes/insinuator2/images/favicons/apple-icon-114x114.png" sizes="114x114">
+  <link rel="apple-touch-icon" href="https://insinuator.net/wp-content/themes/insinuator2/images/favicons/apple-icon-120x120.png" sizes="120x120">
+  <link rel="apple-touch-icon" href="https://insinuator.net/wp-content/themes/insinuator2/images/favicons/apple-icon-144x144.png" sizes="144x144">
+  <link rel="apple-touch-icon" href="https://insinuator.net/wp-content/themes/insinuator2/images/favicons/apple-icon-152x152.png" sizes="152x152">
+  <link rel="apple-touch-icon" href="https://insinuator.net/wp-content/themes/insinuator2/images/favicons/apple-icon-180x180.png" sizes="180x180">
+  <link rel="icon" type="image/png" href="https://insinuator.net/wp-content/themes/insinuator2/images/favicons/favicon-96x96.png" sizes="96x96">
+	<link rel="icon" type="image/png" href="https://insinuator.net/wp-content/themes/insinuator2/images/favicons/favicon-32x32.png">
+  
+	<title>Bluetooth Headphone Jacking: Full Disclosure of Airoha RACE Vulnerabilities – Insinuator.net</title>
+<meta name="robots" content="max-image-preview:large">
+<link rel="alternate" type="application/rss+xml" title="Insinuator.net » Feed" href="https://insinuator.net/feed/">
+<link rel="alternate" type="application/rss+xml" title="Insinuator.net » Comments Feed" href="https://insinuator.net/comments/feed/">
+<link rel="alternate" type="application/rss+xml" title="Insinuator.net » Bluetooth Headphone Jacking: Full Disclosure of Airoha RACE Vulnerabilities Comments Feed" href="https://insinuator.net/2025/12/bluetooth-headphone-jacking-full-disclosure-of-airoha-race-vulnerabilities/feed/">
+<link rel="alternate" title="oEmbed (JSON)" type="application/json+oembed" href="https://insinuator.net/wp-json/oembed/1.0/embed?url=https%3A%2F%2Finsinuator.net%2F2025%2F12%2Fbluetooth-headphone-jacking-full-disclosure-of-airoha-race-vulnerabilities%2F">
+<link rel="alternate" title="oEmbed (XML)" type="text/xml+oembed" href="https://insinuator.net/wp-json/oembed/1.0/embed?url=https%3A%2F%2Finsinuator.net%2F2025%2F12%2Fbluetooth-headphone-jacking-full-disclosure-of-airoha-race-vulnerabilities%2F&amp;format=xml">
+<style id="wp-img-auto-sizes-contain-inline-css" type="text/css">
+img:is([sizes=auto i],[sizes^="auto," i]){contain-intrinsic-size:3000px 1500px}
+/*# sourceURL=wp-img-auto-sizes-contain-inline-css */
+</style>
+<style id="wp-emoji-styles-inline-css" type="text/css">
+
+	img.wp-smiley, img.emoji {
+		display: inline !important;
+		border: none !important;
+		box-shadow: none !important;
+		height: 1em !important;
+		width: 1em !important;
+		margin: 0 0.07em !important;
+		vertical-align: -0.1em !important;
+		background: none !important;
+		padding: 0 !important;
+	}
+/*# sourceURL=wp-emoji-styles-inline-css */
+</style>
+<style id="wp-block-library-inline-css" type="text/css">
+:root{--wp-block-synced-color:#7a00df;--wp-block-synced-color--rgb:122,0,223;--wp-bound-block-color:var(--wp-block-synced-color);--wp-editor-canvas-background:#ddd;--wp-admin-theme-color:#007cba;--wp-admin-theme-color--rgb:0,124,186;--wp-admin-theme-color-darker-10:#006ba1;--wp-admin-theme-color-darker-10--rgb:0,107,160.5;--wp-admin-theme-color-darker-20:#005a87;--wp-admin-theme-color-darker-20--rgb:0,90,135;--wp-admin-border-width-focus:2px}@media (min-resolution:192dpi){:root{--wp-admin-border-width-focus:1.5px}}.wp-element-button{cursor:pointer}:root .has-very-light-gray-background-color{background-color:#eee}:root .has-very-dark-gray-background-color{background-color:#313131}:root .has-very-light-gray-color{color:#eee}:root .has-very-dark-gray-color{color:#313131}:root .has-vivid-green-cyan-to-vivid-cyan-blue-gradient-background{background:linear-gradient(135deg,#00d084,#0693e3)}:root .has-purple-crush-gradient-background{background:linear-gradient(135deg,#34e2e4,#4721fb 50%,#ab1dfe)}:root .has-hazy-dawn-gradient-background{background:linear-gradient(135deg,#faaca8,#dad0ec)}:root .has-subdued-olive-gradient-background{background:linear-gradient(135deg,#fafae1,#67a671)}:root .has-atomic-cream-gradient-background{background:linear-gradient(135deg,#fdd79a,#004a59)}:root .has-nightshade-gradient-background{background:linear-gradient(135deg,#330968,#31cdcf)}:root .has-midnight-gradient-background{background:linear-gradient(135deg,#020381,#2874fc)}:root{--wp--preset--font-size--normal:16px;--wp--preset--font-size--huge:42px}.has-regular-font-size{font-size:1em}.has-larger-font-size{font-size:2.625em}.has-normal-font-size{font-size:var(--wp--preset--font-size--normal)}.has-huge-font-size{font-size:var(--wp--preset--font-size--huge)}.has-text-align-center{text-align:center}.has-text-align-left{text-align:left}.has-text-align-right{text-align:right}.has-fit-text{white-space:nowrap!important}#end-resizable-editor-section{display:none}.aligncenter{clear:both}.items-justified-left{justify-content:flex-start}.items-justified-center{justify-content:center}.items-justified-right{justify-content:flex-end}.items-justified-space-between{justify-content:space-between}.screen-reader-text{border:0;clip-path:inset(50%);height:1px;margin:-1px;overflow:hidden;padding:0;position:absolute;width:1px;word-wrap:normal!important}.screen-reader-text:focus{background-color:#ddd;clip-path:none;color:#444;display:block;font-size:1em;height:auto;left:5px;line-height:normal;padding:15px 23px 14px;text-decoration:none;top:5px;width:auto;z-index:100000}html :where(.has-border-color){border-style:solid}html :where([style*=border-top-color]){border-top-style:solid}html :where([style*=border-right-color]){border-right-style:solid}html :where([style*=border-bottom-color]){border-bottom-style:solid}html :where([style*=border-left-color]){border-left-style:solid}html :where([style*=border-width]){border-style:solid}html :where([style*=border-top-width]){border-top-style:solid}html :where([style*=border-right-width]){border-right-style:solid}html :where([style*=border-bottom-width]){border-bottom-style:solid}html :where([style*=border-left-width]){border-left-style:solid}html :where(img[class*=wp-image-]){height:auto;max-width:100%}:where(figure){margin:0 0 1em}html :where(.is-position-sticky){--wp-admin--admin-bar--position-offset:var(--wp-admin--admin-bar--height,0px)}@media screen and (max-width:600px){html :where(.is-position-sticky){--wp-admin--admin-bar--position-offset:0px}}
+
+/*# sourceURL=wp-block-library-inline-css */
+</style>
+<style id="classic-theme-styles-inline-css" type="text/css">
+/*! This file is auto-generated */
+.wp-block-button__link{color:#fff;background-color:#32373c;border-radius:9999px;box-shadow:none;text-decoration:none;padding:calc(.667em + 2px) calc(1.333em + 2px);font-size:1.125em}.wp-block-file__button{background:#32373c;color:#fff;text-decoration:none}
+/*# sourceURL=/wp-includes/css/classic-themes.min.css */
+</style>
+<style id="global-styles-inline-css" type="text/css">
+:root{--wp--preset--aspect-ratio--square: 1;--wp--preset--aspect-ratio--4-3: 4/3;--wp--preset--aspect-ratio--3-4: 3/4;--wp--preset--aspect-ratio--3-2: 3/2;--wp--preset--aspect-ratio--2-3: 2/3;--wp--preset--aspect-ratio--16-9: 16/9;--wp--preset--aspect-ratio--9-16: 9/16;--wp--preset--color--black: #000000;--wp--preset--color--cyan-bluish-gray: #abb8c3;--wp--preset--color--white: #ffffff;--wp--preset--color--pale-pink: #f78da7;--wp--preset--color--vivid-red: #cf2e2e;--wp--preset--color--luminous-vivid-orange: #ff6900;--wp--preset--color--luminous-vivid-amber: #fcb900;--wp--preset--color--light-green-cyan: #7bdcb5;--wp--preset--color--vivid-green-cyan: #00d084;--wp--preset--color--pale-cyan-blue: #8ed1fc;--wp--preset--color--vivid-cyan-blue: #0693e3;--wp--preset--color--vivid-purple: #9b51e0;--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple: linear-gradient(135deg,rgb(6,147,227) 0%,rgb(155,81,224) 100%);--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan: linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%);--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange: linear-gradient(135deg,rgb(252,185,0) 0%,rgb(255,105,0) 100%);--wp--preset--gradient--luminous-vivid-orange-to-vivid-red: linear-gradient(135deg,rgb(255,105,0) 0%,rgb(207,46,46) 100%);--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray: linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%);--wp--preset--gradient--cool-to-warm-spectrum: linear-gradient(135deg,rgb(74,234,220) 0%,rgb(151,120,209) 20%,rgb(207,42,186) 40%,rgb(238,44,130) 60%,rgb(251,105,98) 80%,rgb(254,248,76) 100%);--wp--preset--gradient--blush-light-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%);--wp--preset--gradient--blush-bordeaux: linear-gradient(135deg,rgb(254,205,165) 0%,rgb(254,45,45) 50%,rgb(107,0,62) 100%);--wp--preset--gradient--luminous-dusk: linear-gradient(135deg,rgb(255,203,112) 0%,rgb(199,81,192) 50%,rgb(65,88,208) 100%);--wp--preset--gradient--pale-ocean: linear-gradient(135deg,rgb(255,245,203) 0%,rgb(182,227,212) 50%,rgb(51,167,181) 100%);--wp--preset--gradient--electric-grass: linear-gradient(135deg,rgb(202,248,128) 0%,rgb(113,206,126) 100%);--wp--preset--gradient--midnight: linear-gradient(135deg,rgb(2,3,129) 0%,rgb(40,116,252) 100%);--wp--preset--font-size--small: 13px;--wp--preset--font-size--medium: 20px;--wp--preset--font-size--large: 36px;--wp--preset--font-size--x-large: 42px;--wp--preset--spacing--20: 0.44rem;--wp--preset--spacing--30: 0.67rem;--wp--preset--spacing--40: 1rem;--wp--preset--spacing--50: 1.5rem;--wp--preset--spacing--60: 2.25rem;--wp--preset--spacing--70: 3.38rem;--wp--preset--spacing--80: 5.06rem;--wp--preset--shadow--natural: 6px 6px 9px rgba(0, 0, 0, 0.2);--wp--preset--shadow--deep: 12px 12px 50px rgba(0, 0, 0, 0.4);--wp--preset--shadow--sharp: 6px 6px 0px rgba(0, 0, 0, 0.2);--wp--preset--shadow--outlined: 6px 6px 0px -3px rgb(255, 255, 255), 6px 6px rgb(0, 0, 0);--wp--preset--shadow--crisp: 6px 6px 0px rgb(0, 0, 0);}:where(.is-layout-flex){gap: 0.5em;}:where(.is-layout-grid){gap: 0.5em;}body .is-layout-flex{display: flex;}.is-layout-flex{flex-wrap: wrap;align-items: center;}.is-layout-flex > :is(*, div){margin: 0;}body .is-layout-grid{display: grid;}.is-layout-grid > :is(*, div){margin: 0;}:where(.wp-block-columns.is-layout-flex){gap: 2em;}:where(.wp-block-columns.is-layout-grid){gap: 2em;}:where(.wp-block-post-template.is-layout-flex){gap: 1.25em;}:where(.wp-block-post-template.is-layout-grid){gap: 1.25em;}.has-black-color{color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-color{color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-color{color: var(--wp--preset--color--white) !important;}.has-pale-pink-color{color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-color{color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-color{color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-color{color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-color{color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-color{color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-color{color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-color{color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-color{color: var(--wp--preset--color--vivid-purple) !important;}.has-black-background-color{background-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-background-color{background-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-background-color{background-color: var(--wp--preset--color--white) !important;}.has-pale-pink-background-color{background-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-background-color{background-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-background-color{background-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-background-color{background-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-background-color{background-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-background-color{background-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-background-color{background-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-background-color{background-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-background-color{background-color: var(--wp--preset--color--vivid-purple) !important;}.has-black-border-color{border-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-border-color{border-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-border-color{border-color: var(--wp--preset--color--white) !important;}.has-pale-pink-border-color{border-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-border-color{border-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-border-color{border-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-border-color{border-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-border-color{border-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-border-color{border-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-border-color{border-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-border-color{border-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-border-color{border-color: var(--wp--preset--color--vivid-purple) !important;}.has-vivid-cyan-blue-to-vivid-purple-gradient-background{background: var(--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple) !important;}.has-light-green-cyan-to-vivid-green-cyan-gradient-background{background: var(--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan) !important;}.has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange) !important;}.has-luminous-vivid-orange-to-vivid-red-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-orange-to-vivid-red) !important;}.has-very-light-gray-to-cyan-bluish-gray-gradient-background{background: var(--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray) !important;}.has-cool-to-warm-spectrum-gradient-background{background: var(--wp--preset--gradient--cool-to-warm-spectrum) !important;}.has-blush-light-purple-gradient-background{background: var(--wp--preset--gradient--blush-light-purple) !important;}.has-blush-bordeaux-gradient-background{background: var(--wp--preset--gradient--blush-bordeaux) !important;}.has-luminous-dusk-gradient-background{background: var(--wp--preset--gradient--luminous-dusk) !important;}.has-pale-ocean-gradient-background{background: var(--wp--preset--gradient--pale-ocean) !important;}.has-electric-grass-gradient-background{background: var(--wp--preset--gradient--electric-grass) !important;}.has-midnight-gradient-background{background: var(--wp--preset--gradient--midnight) !important;}.has-small-font-size{font-size: var(--wp--preset--font-size--small) !important;}.has-medium-font-size{font-size: var(--wp--preset--font-size--medium) !important;}.has-large-font-size{font-size: var(--wp--preset--font-size--large) !important;}.has-x-large-font-size{font-size: var(--wp--preset--font-size--x-large) !important;}
+/*# sourceURL=global-styles-inline-css */
+</style>
+
+<link rel="stylesheet" id="insinuator-2-style-css" href="https://insinuator.net/wp-content/themes/insinuator2/style.css?ver=6.9.4" type="text/css" media="all">
+<link rel="https://api.w.org/" href="https://insinuator.net/wp-json/"><link rel="alternate" title="JSON" type="application/json" href="https://insinuator.net/wp-json/wp/v2/posts/15654"><link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://insinuator.net/xmlrpc.php?rsd">
+<meta name="generator" content="WordPress 6.9.4">
+<link rel="canonical" href="https://insinuator.net/2025/12/bluetooth-headphone-jacking-full-disclosure-of-airoha-race-vulnerabilities/">
+<link rel="shortlink" href="https://insinuator.net/?p=15654">
+<link rel="stylesheet" id="dashicons-css" href="https://insinuator.net/wp-includes/css/dashicons.min.css?ver=6.9.4" type="text/css" media="all">
+<link rel="stylesheet" id="multiple-authors-widget-css-css" href="https://insinuator.net/wp-content/plugins/publishpress-authors/src/assets/css/multiple-authors-widget.css?ver=4.13.0" type="text/css" media="all">
+<style id="multiple-authors-widget-css-inline-css" type="text/css">
+:root { --ppa-color-scheme: #655997; --ppa-color-scheme-active: #514779; }
+/*# sourceURL=multiple-authors-widget-css-inline-css */
+</style>
+<link rel="stylesheet" id="multiple-authors-fontawesome-css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css?ver=4.13.0" type="text/css" media="all">
+
+<script src="https://insinuator.net/wp-includes/js/wp-emoji-release.min.js?ver=6.9.4" defer=""></script></head>
+
+<body class="wp-singular post-template-default single single-post postid-15654 single-format-standard wp-theme-insinuator2 group-blog">
+
+	<!-- hello icons! -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="menu" viewBox="0 0 14 12">
+    <rect width="14" height="2" rx="1"></rect>
+    <rect y="5" width="10" height="2" rx="1"></rect>
+    <rect y="10" width="14" height="2" rx="1"></rect>
+  </symbol>
+
+  <symbol id="search" viewBox="0 0 16 16">
+    <path d="M15.557 14.166l-4.206-4.234a6.281 6.281 0 0 0 1.16-3.64C12.51 2.817 9.71 0 6.255 0 2.801 0 0 2.817 0 6.292c0 3.474 2.8 6.291 6.255 6.291 1.35 0 2.597-.435 3.62-1.166l4.205 4.234a1.039 1.039 0 0 0 1.477 0 1.054 1.054 0 0 0 0-1.485zM10.426 6.29a4.157 4.157 0 1 1-8.314 0 4.157 4.157 0 0 1 8.314 0z"></path>
+  </symbol>
+
+  <symbol id="back" viewBox="0 0 9 16">
+    <path d="M.322 8.77l6.751 6.862c.43.436 1.126.436 1.555 0a1.13 1.13 0 0 0 0-1.58L2.654 7.98l5.974-6.072a1.13 1.13 0 0 0 0-1.58 1.086 1.086 0 0 0-1.555 0L.32 7.19A1.124 1.124 0 0 0 0 7.98c0 .286.107.572.322.79z"></path>
+  </symbol>
+
+  <symbol id="mail" viewBox="0 0 17 16">
+    <path d="M16.992 5.895c0-.606-.315-1.137-.8-1.431L8.5 0 .807 4.464A1.673 1.673 0 0 0 0 5.894v8.422C0 15.242.765 16 1.7 16h13.6c.935 0 1.7-.758 1.7-1.684l-.008-8.421zM8.5 10.105L1.479 5.76 8.5 1.684l7.021 4.076L8.5 10.105z"></path>
+  </symbol>
+
+  <symbol id="twitter" viewBox="0 0 20 16">
+    <path d="M18.559 2.233c-.103.054-.3.124-.533.192.293-.39.529-.826.634-1.218a.42.42 0 0 0-.164-.45.42.42 0 0 0-.48 0c-.224.159-1.315.632-2.004.786-1.547-1.356-3.383-1.498-5.254-.406-1.533.896-1.866 2.712-1.8 3.821-3.503-.337-5.683-2.19-6.911-3.722a.416.416 0 0 0-.683.049C.782 2.264.623 3.347.9 4.417c.153.582.417 1.097.725 1.514a2.177 2.177 0 0 1-.424-.272.416.416 0 0 0-.68.322c0 1.908 1.202 3.092 2.253 3.705a3.085 3.085 0 0 1-.568-.12.412.412 0 0 0-.501.561c.6 1.332 1.742 2.237 3.156 2.57-1.221.718-2.848 1.059-4.398.881-.197-.025-.382.047-.444.237-.06.188.019.214.192.312 2.054 1.153 4.13 1.463 6.172 1.463 3.06 0 5.922-1.044 8.06-3.44 2.008-2.246 3.06-4.876 2.848-7.477.528-.392 1.32-1.093 1.81-1.866a.39.39 0 0 0-.044-.486.418.418 0 0 0-.5-.088z"></path>
+  </symbol>
+
+  <symbol id="mastodon" viewBox="0 0 448 512">
+    <path d="M433 179.11c0-97.2-63.71-125.7-63.71-125.7-62.52-28.7-228.56-28.4-290.48 0 0 0-63.72 28.5-63.72 125.7 0 115.7-6.6 259.4 105.63 289.1 40.51 10.7 75.32 13 103.33 11.4 50.81-2.8 79.32-18.1 79.32-18.1l-1.7-36.9s-36.31 11.4-77.12 10.1c-40.41-1.4-83-4.4-89.63-54a102.54 102.54 0 0 1-.9-13.9c85.63 20.9 158.65 9.1 178.75 6.7 56.12-6.7 105-41.3 111.23-72.9 9.8-49.8 9-121.5 9-121.5zm-75.12 125.2h-46.63v-114.2c0-49.7-64-51.6-64 6.9v62.5h-46.33V197c0-58.5-64-56.6-64-6.9v114.2H90.19c0-122.1-5.2-147.9 18.41-175 25.9-28.9 79.82-30.8 103.83 6.1l11.6 19.5 11.6-19.5c24.11-37.1 78.12-34.8 103.83-6.1 23.71 27.3 18.4 53 18.4 175z"></path>
+  </symbol>
+
+  <symbol id="linkedin" viewBox="0 0 448 512">
+    <path d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z"></path>
+  </symbol>
+
+  <symbol id="rss" viewBox="0 0 15 16">
+    <g transform="rotate(45 3.864 2.5)">
+      <path d="M0 3.955l1.818 1.737c4.518-4.317 11.846-4.317 16.364 0L20 3.955c-5.518-5.273-14.473-5.273-20 0zm3.636 3.474l1.819 1.738c2.509-2.398 6.581-2.398 9.09 0l1.819-1.738c-3.51-3.353-9.21-3.353-12.728 0z"></path>
+      <ellipse cx="10.093" cy="11.333" rx="2.093" ry="2"></ellipse>
+    </g>
+  </symbol>
+</svg>
+
+	<div id="page" class="site">
+		<div class="site-header-wrap">
+			<header id="masthead" class="site-header" role="banner">
+				<div class="site-branding">
+											<p class="site-title"><a href="https://insinuator.net/" rel="home">Insinuator.net</a></p>
+											<p class="site-description">Bold Statements</p>
+									</div><!-- .site-branding -->
+
+				<nav id="site-navigation" class="main-navigation" role="navigation">
+					<a href="#" class="menu-toggle" aria-controls="primary-menu" aria-expanded="false">
+						<svg class="icon icon--menu">
+			        <use xlink:href="#menu"></use>
+			      </svg>
+						<svg class="icon icon--back">
+			        <use xlink:href="#back"></use>
+			      </svg>
+						<span class="label">
+							Primary Menu						</span>
+					</a>
+
+					<div class="nav-drawer">
+						<div id="primary-menu" class="menu"><ul aria-expanded="false" class=" nav-menu">
+<li class="page_item page-item-16"><a href="https://insinuator.net/about/">About</a></li>
+</ul></div>
+
+						<div class="hide-desktop">
+							<section class="static-links links-follow-rss">
+  <ul>
+    <li>
+      <a class="rss-link" href="https://insinuator.net/?feed=rss">
+        <span>RSS Feed</span>
+        <svg class="icon icon--rss"><use xlink:href="#rss"></use></svg>
+      </a>
+    </li>
+    <li>
+      <a class="mastodon-link" href="http://infosec.exchange/@insinuator" target="_blank">
+        <span>Follow us</span>
+        <svg class="icon icon--mastodon"><use xlink:href="#mastodon"></use></svg>
+      </a>
+    </li>
+    <!--<li>
+      <a class="linkedi-link" href="https://de.linkedin.com/company/ernw-gmbh" target="_blank">
+        <span>Follow us</span>
+        <svg class="icon icon--linkedin"><use xlink:href="#linkedin" /></svg>
+      </a>
+    </li>-->
+  </ul>
+</section>
+
+<!--
+<section class="static-links ernw-universe-links">
+  <ul>
+    <li>
+      <a class="svg-link link-troopers" href="https://www.troopers.de" target="_blank"><span class="screen-reader-text">TROOPERS</span></a>
+    </li>
+  </ul>
+</section>
+-->
+
+							<section id="categories-4" class="widget widget_categories"><h2 class="widget-title">Categories</h2>
+			<ul>
+					<li class="cat-item cat-item-14"><a href="https://insinuator.net/category/breaking/">Breaking</a>
+</li>
+	<li class="cat-item cat-item-434"><a href="https://insinuator.net/category/building/">Building</a>
+</li>
+	<li class="cat-item cat-item-28"><a href="https://insinuator.net/category/events/">Events</a>
+</li>
+	<li class="cat-item cat-item-443"><a href="https://insinuator.net/category/misc/">Misc</a>
+</li>
+			</ul>
+
+			</section><section id="tag_cloud-5" class="widget widget_tag_cloud"><h2 class="widget-title">Tags</h2><div class="tagcloud"><a href="https://insinuator.net/tag/4g/" class="tag-cloud-link tag-link-60 tag-link-position-1" style="font-size: 10.102941176471pt;" aria-label="4G (13 items)">4G</a>
+<a href="https://insinuator.net/tag/active-directory/" class="tag-cloud-link tag-link-318 tag-link-position-2" style="font-size: 11.25pt;" aria-label="Active Directory (25 items)">Active Directory</a>
+<a href="https://insinuator.net/tag/advisory/" class="tag-cloud-link tag-link-163 tag-link-position-3" style="font-size: 12.088235294118pt;" aria-label="advisory (39 items)">advisory</a>
+<a href="https://insinuator.net/tag/android/" class="tag-cloud-link tag-link-127 tag-link-position-4" style="font-size: 9.7941176470588pt;" aria-label="Android (11 items)">Android</a>
+<a href="https://insinuator.net/tag/black-hat/" class="tag-cloud-link tag-link-122 tag-link-position-5" style="font-size: 9.9264705882353pt;" aria-label="Black Hat (12 items)">Black Hat</a>
+<a href="https://insinuator.net/tag/bluetooth/" class="tag-cloud-link tag-link-98 tag-link-position-6" style="font-size: 10.102941176471pt;" aria-label="Bluetooth (13 items)">Bluetooth</a>
+<a href="https://insinuator.net/tag/c3/" class="tag-cloud-link tag-link-480 tag-link-position-7" style="font-size: 9.6176470588235pt;" aria-label="C3 (10 items)">C3</a>
+<a href="https://insinuator.net/tag/cisco/" class="tag-cloud-link tag-link-113 tag-link-position-8" style="font-size: 10.941176470588pt;" aria-label="Cisco (21 items)">Cisco</a>
+<a href="https://insinuator.net/tag/cloud/" class="tag-cloud-link tag-link-56 tag-link-position-9" style="font-size: 11.25pt;" aria-label="cloud (25 items)">cloud</a>
+<a href="https://insinuator.net/tag/day-con/" class="tag-cloud-link tag-link-486 tag-link-position-10" style="font-size: 9.4411764705882pt;" aria-label="Day-Con (9 items)">Day-Con</a>
+<a href="https://insinuator.net/tag/dhcpv6/" class="tag-cloud-link tag-link-270 tag-link-position-11" style="font-size: 9pt;" aria-label="DHCPv6 (7 items)">DHCPv6</a>
+<a href="https://insinuator.net/tag/disclosure/" class="tag-cloud-link tag-link-203 tag-link-position-12" style="font-size: 12.485294117647pt;" aria-label="disclosure (48 items)">disclosure</a>
+<a href="https://insinuator.net/tag/docker/" class="tag-cloud-link tag-link-363 tag-link-position-13" style="font-size: 9.4411764705882pt;" aria-label="Docker (9 items)">Docker</a>
+<a href="https://insinuator.net/tag/ernw-white-paper/" class="tag-cloud-link tag-link-47 tag-link-position-14" style="font-size: 10.764705882353pt;" aria-label="ERNW white paper (19 items)">ERNW white paper</a>
+<a href="https://insinuator.net/tag/exploit/" class="tag-cloud-link tag-link-167 tag-link-position-15" style="font-size: 9.4411764705882pt;" aria-label="exploit (9 items)">exploit</a>
+<a href="https://insinuator.net/tag/extension-headers/" class="tag-cloud-link tag-link-176 tag-link-position-16" style="font-size: 9pt;" aria-label="extension headers (7 items)">extension headers</a>
+<a href="https://insinuator.net/tag/forensics/" class="tag-cloud-link tag-link-371 tag-link-position-17" style="font-size: 10.676470588235pt;" aria-label="forensics (18 items)">forensics</a>
+<a href="https://insinuator.net/tag/fuzzing/" class="tag-cloud-link tag-link-67 tag-link-position-18" style="font-size: 10.323529411765pt;" aria-label="fuzzing (15 items)">fuzzing</a>
+<a href="https://insinuator.net/tag/gsm/" class="tag-cloud-link tag-link-104 tag-link-position-19" style="font-size: 9.7941176470588pt;" aria-label="GSM (11 items)">GSM</a>
+<a href="https://insinuator.net/tag/hardening/" class="tag-cloud-link tag-link-212 tag-link-position-20" style="font-size: 10.852941176471pt;" aria-label="hardening (20 items)">hardening</a>
+<a href="https://insinuator.net/tag/hardware/" class="tag-cloud-link tag-link-334 tag-link-position-21" style="font-size: 11.029411764706pt;" aria-label="hardware (22 items)">hardware</a>
+<a href="https://insinuator.net/tag/hitb/" class="tag-cloud-link tag-link-137 tag-link-position-22" style="font-size: 9.6176470588235pt;" aria-label="HITB (10 items)">HITB</a>
+<a href="https://insinuator.net/tag/iot/" class="tag-cloud-link tag-link-306 tag-link-position-23" style="font-size: 11.558823529412pt;" aria-label="IoT (29 items)">IoT</a>
+<a href="https://insinuator.net/tag/ipv6/" class="tag-cloud-link tag-link-64 tag-link-position-24" style="font-size: 14.558823529412pt;" aria-label="IPv6 (144 items)">IPv6</a>
+<a href="https://insinuator.net/tag/linux/" class="tag-cloud-link tag-link-275 tag-link-position-25" style="font-size: 10.102941176471pt;" aria-label="Linux (13 items)">Linux</a>
+<a href="https://insinuator.net/tag/malware/" class="tag-cloud-link tag-link-350 tag-link-position-26" style="font-size: 10.676470588235pt;" aria-label="malware (18 items)">malware</a>
+<a href="https://insinuator.net/tag/medical/" class="tag-cloud-link tag-link-449 tag-link-position-27" style="font-size: 10.764705882353pt;" aria-label="medical (19 items)">medical</a>
+<a href="https://insinuator.net/tag/microsoft/" class="tag-cloud-link tag-link-252 tag-link-position-28" style="font-size: 9pt;" aria-label="Microsoft (7 items)">Microsoft</a>
+<a href="https://insinuator.net/tag/network/" class="tag-cloud-link tag-link-33 tag-link-position-29" style="font-size: 9.6176470588235pt;" aria-label="network (10 items)">network</a>
+<a href="https://insinuator.net/tag/pentest/" class="tag-cloud-link tag-link-135 tag-link-position-30" style="font-size: 11.470588235294pt;" aria-label="pentest (28 items)">pentest</a>
+<a href="https://insinuator.net/tag/reversing/" class="tag-cloud-link tag-link-332 tag-link-position-31" style="font-size: 11.205882352941pt;" aria-label="reversing (24 items)">reversing</a>
+<a href="https://insinuator.net/tag/ripe/" class="tag-cloud-link tag-link-268 tag-link-position-32" style="font-size: 9.2205882352941pt;" aria-label="RIPE (8 items)">RIPE</a>
+<a href="https://insinuator.net/tag/risk/" class="tag-cloud-link tag-link-39 tag-link-position-33" style="font-size: 9.2205882352941pt;" aria-label="risk (8 items)">risk</a>
+<a href="https://insinuator.net/tag/sap/" class="tag-cloud-link tag-link-109 tag-link-position-34" style="font-size: 9.7941176470588pt;" aria-label="SAP (11 items)">SAP</a>
+<a href="https://insinuator.net/tag/sdr/" class="tag-cloud-link tag-link-265 tag-link-position-35" style="font-size: 9.6176470588235pt;" aria-label="SDR (10 items)">SDR</a>
+<a href="https://insinuator.net/tag/telco/" class="tag-cloud-link tag-link-290 tag-link-position-36" style="font-size: 9.6176470588235pt;" aria-label="Telco (10 items)">Telco</a>
+<a href="https://insinuator.net/tag/telcosecday/" class="tag-cloud-link tag-link-360 tag-link-position-37" style="font-size: 10.852941176471pt;" aria-label="TelcoSecDay (20 items)">TelcoSecDay</a>
+<a href="https://insinuator.net/tag/tool/" class="tag-cloud-link tag-link-45 tag-link-position-38" style="font-size: 12.264705882353pt;" aria-label="tool (43 items)">tool</a>
+<a href="https://insinuator.net/tag/troopers/" class="tag-cloud-link tag-link-325 tag-link-position-39" style="font-size: 15pt;" aria-label="TROOPERS (182 items)">TROOPERS</a>
+<a href="https://insinuator.net/tag/virtualization/" class="tag-cloud-link tag-link-19 tag-link-position-40" style="font-size: 10.676470588235pt;" aria-label="virtualization (18 items)">virtualization</a>
+<a href="https://insinuator.net/tag/vmware/" class="tag-cloud-link tag-link-49 tag-link-position-41" style="font-size: 10.235294117647pt;" aria-label="VMware (14 items)">VMware</a>
+<a href="https://insinuator.net/tag/voip/" class="tag-cloud-link tag-link-112 tag-link-position-42" style="font-size: 9.6176470588235pt;" aria-label="VoIP (10 items)">VoIP</a>
+<a href="https://insinuator.net/tag/vulnerability/" class="tag-cloud-link tag-link-634 tag-link-position-43" style="font-size: 9.9264705882353pt;" aria-label="vulnerability (12 items)">vulnerability</a>
+<a href="https://insinuator.net/tag/web-application/" class="tag-cloud-link tag-link-139 tag-link-position-44" style="font-size: 10.588235294118pt;" aria-label="web application (17 items)">web application</a>
+<a href="https://insinuator.net/tag/windows/" class="tag-cloud-link tag-link-155 tag-link-position-45" style="font-size: 12.264705882353pt;" aria-label="Windows (43 items)">Windows</a></div>
+</section><section id="archives-5" class="widget widget_archive"><h2 class="widget-title">Archives</h2>		<label class="screen-reader-text" for="archives-dropdown-5">Archives</label>
+		<select id="archives-dropdown-5" name="archive-dropdown">
+			
+			<option value="">Select Month</option>
+				<option value="https://insinuator.net/2026/03/"> March 2026 &nbsp;(6)</option>
+	<option value="https://insinuator.net/2026/02/"> February 2026 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2026/01/"> January 2026 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2025/12/"> December 2025 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2025/10/"> October 2025 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2025/09/"> September 2025 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2025/08/"> August 2025 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2025/07/"> July 2025 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2025/06/"> June 2025 &nbsp;(4)</option>
+	<option value="https://insinuator.net/2025/05/"> May 2025 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2025/04/"> April 2025 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2025/03/"> March 2025 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2025/02/"> February 2025 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2025/01/"> January 2025 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2024/11/"> November 2024 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2024/09/"> September 2024 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2024/08/"> August 2024 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2024/06/"> June 2024 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2024/05/"> May 2024 &nbsp;(4)</option>
+	<option value="https://insinuator.net/2024/04/"> April 2024 &nbsp;(4)</option>
+	<option value="https://insinuator.net/2024/02/"> February 2024 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2023/10/"> October 2023 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2023/09/"> September 2023 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2023/08/"> August 2023 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2023/07/"> July 2023 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2023/06/"> June 2023 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2023/05/"> May 2023 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2022/12/"> December 2022 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2022/09/"> September 2022 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2022/08/"> August 2022 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2022/06/"> June 2022 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2022/04/"> April 2022 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2022/03/"> March 2022 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2021/12/"> December 2021 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2021/10/"> October 2021 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2021/07/"> July 2021 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2021/05/"> May 2021 &nbsp;(4)</option>
+	<option value="https://insinuator.net/2021/04/"> April 2021 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2021/03/"> March 2021 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2021/02/"> February 2021 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2021/01/"> January 2021 &nbsp;(5)</option>
+	<option value="https://insinuator.net/2020/12/"> December 2020 &nbsp;(4)</option>
+	<option value="https://insinuator.net/2020/11/"> November 2020 &nbsp;(6)</option>
+	<option value="https://insinuator.net/2020/10/"> October 2020 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2020/09/"> September 2020 &nbsp;(5)</option>
+	<option value="https://insinuator.net/2020/07/"> July 2020 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2020/06/"> June 2020 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2020/05/"> May 2020 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2020/04/"> April 2020 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2020/03/"> March 2020 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2020/02/"> February 2020 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2020/01/"> January 2020 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2019/12/"> December 2019 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2019/11/"> November 2019 &nbsp;(6)</option>
+	<option value="https://insinuator.net/2019/10/"> October 2019 &nbsp;(4)</option>
+	<option value="https://insinuator.net/2019/09/"> September 2019 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2019/08/"> August 2019 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2019/07/"> July 2019 &nbsp;(6)</option>
+	<option value="https://insinuator.net/2019/06/"> June 2019 &nbsp;(6)</option>
+	<option value="https://insinuator.net/2019/05/"> May 2019 &nbsp;(7)</option>
+	<option value="https://insinuator.net/2019/04/"> April 2019 &nbsp;(7)</option>
+	<option value="https://insinuator.net/2019/03/"> March 2019 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2019/02/"> February 2019 &nbsp;(4)</option>
+	<option value="https://insinuator.net/2019/01/"> January 2019 &nbsp;(14)</option>
+	<option value="https://insinuator.net/2018/12/"> December 2018 &nbsp;(4)</option>
+	<option value="https://insinuator.net/2018/11/"> November 2018 &nbsp;(11)</option>
+	<option value="https://insinuator.net/2018/10/"> October 2018 &nbsp;(6)</option>
+	<option value="https://insinuator.net/2018/09/"> September 2018 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2018/08/"> August 2018 &nbsp;(4)</option>
+	<option value="https://insinuator.net/2018/07/"> July 2018 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2018/06/"> June 2018 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2018/05/"> May 2018 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2018/04/"> April 2018 &nbsp;(5)</option>
+	<option value="https://insinuator.net/2018/03/"> March 2018 &nbsp;(8)</option>
+	<option value="https://insinuator.net/2018/02/"> February 2018 &nbsp;(12)</option>
+	<option value="https://insinuator.net/2018/01/"> January 2018 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2017/12/"> December 2017 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2017/11/"> November 2017 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2017/10/"> October 2017 &nbsp;(7)</option>
+	<option value="https://insinuator.net/2017/09/"> September 2017 &nbsp;(5)</option>
+	<option value="https://insinuator.net/2017/08/"> August 2017 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2017/07/"> July 2017 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2017/06/"> June 2017 &nbsp;(6)</option>
+	<option value="https://insinuator.net/2017/05/"> May 2017 &nbsp;(5)</option>
+	<option value="https://insinuator.net/2017/04/"> April 2017 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2017/03/"> March 2017 &nbsp;(8)</option>
+	<option value="https://insinuator.net/2017/02/"> February 2017 &nbsp;(6)</option>
+	<option value="https://insinuator.net/2017/01/"> January 2017 &nbsp;(8)</option>
+	<option value="https://insinuator.net/2016/12/"> December 2016 &nbsp;(12)</option>
+	<option value="https://insinuator.net/2016/11/"> November 2016 &nbsp;(14)</option>
+	<option value="https://insinuator.net/2016/10/"> October 2016 &nbsp;(12)</option>
+	<option value="https://insinuator.net/2016/09/"> September 2016 &nbsp;(12)</option>
+	<option value="https://insinuator.net/2016/08/"> August 2016 &nbsp;(9)</option>
+	<option value="https://insinuator.net/2016/07/"> July 2016 &nbsp;(9)</option>
+	<option value="https://insinuator.net/2016/06/"> June 2016 &nbsp;(7)</option>
+	<option value="https://insinuator.net/2016/05/"> May 2016 &nbsp;(10)</option>
+	<option value="https://insinuator.net/2016/04/"> April 2016 &nbsp;(23)</option>
+	<option value="https://insinuator.net/2016/03/"> March 2016 &nbsp;(29)</option>
+	<option value="https://insinuator.net/2016/02/"> February 2016 &nbsp;(14)</option>
+	<option value="https://insinuator.net/2016/01/"> January 2016 &nbsp;(12)</option>
+	<option value="https://insinuator.net/2015/12/"> December 2015 &nbsp;(15)</option>
+	<option value="https://insinuator.net/2015/11/"> November 2015 &nbsp;(6)</option>
+	<option value="https://insinuator.net/2015/10/"> October 2015 &nbsp;(9)</option>
+	<option value="https://insinuator.net/2015/09/"> September 2015 &nbsp;(7)</option>
+	<option value="https://insinuator.net/2015/08/"> August 2015 &nbsp;(5)</option>
+	<option value="https://insinuator.net/2015/07/"> July 2015 &nbsp;(6)</option>
+	<option value="https://insinuator.net/2015/06/"> June 2015 &nbsp;(14)</option>
+	<option value="https://insinuator.net/2015/05/"> May 2015 &nbsp;(9)</option>
+	<option value="https://insinuator.net/2015/04/"> April 2015 &nbsp;(9)</option>
+	<option value="https://insinuator.net/2015/03/"> March 2015 &nbsp;(13)</option>
+	<option value="https://insinuator.net/2015/02/"> February 2015 &nbsp;(10)</option>
+	<option value="https://insinuator.net/2015/01/"> January 2015 &nbsp;(18)</option>
+	<option value="https://insinuator.net/2014/12/"> December 2014 &nbsp;(10)</option>
+	<option value="https://insinuator.net/2014/11/"> November 2014 &nbsp;(10)</option>
+	<option value="https://insinuator.net/2014/10/"> October 2014 &nbsp;(7)</option>
+	<option value="https://insinuator.net/2014/09/"> September 2014 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2014/08/"> August 2014 &nbsp;(9)</option>
+	<option value="https://insinuator.net/2014/07/"> July 2014 &nbsp;(5)</option>
+	<option value="https://insinuator.net/2014/06/"> June 2014 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2014/05/"> May 2014 &nbsp;(9)</option>
+	<option value="https://insinuator.net/2014/04/"> April 2014 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2014/03/"> March 2014 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2014/02/"> February 2014 &nbsp;(5)</option>
+	<option value="https://insinuator.net/2014/01/"> January 2014 &nbsp;(13)</option>
+	<option value="https://insinuator.net/2013/12/"> December 2013 &nbsp;(5)</option>
+	<option value="https://insinuator.net/2013/11/"> November 2013 &nbsp;(5)</option>
+	<option value="https://insinuator.net/2013/10/"> October 2013 &nbsp;(4)</option>
+	<option value="https://insinuator.net/2013/09/"> September 2013 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2013/08/"> August 2013 &nbsp;(10)</option>
+	<option value="https://insinuator.net/2013/07/"> July 2013 &nbsp;(10)</option>
+	<option value="https://insinuator.net/2013/06/"> June 2013 &nbsp;(5)</option>
+	<option value="https://insinuator.net/2013/05/"> May 2013 &nbsp;(4)</option>
+	<option value="https://insinuator.net/2013/04/"> April 2013 &nbsp;(10)</option>
+	<option value="https://insinuator.net/2013/03/"> March 2013 &nbsp;(4)</option>
+	<option value="https://insinuator.net/2013/02/"> February 2013 &nbsp;(12)</option>
+	<option value="https://insinuator.net/2013/01/"> January 2013 &nbsp;(6)</option>
+	<option value="https://insinuator.net/2012/12/"> December 2012 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2012/11/"> November 2012 &nbsp;(4)</option>
+	<option value="https://insinuator.net/2012/10/"> October 2012 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2012/09/"> September 2012 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2012/07/"> July 2012 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2012/06/"> June 2012 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2012/05/"> May 2012 &nbsp;(8)</option>
+	<option value="https://insinuator.net/2012/04/"> April 2012 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2012/03/"> March 2012 &nbsp;(5)</option>
+	<option value="https://insinuator.net/2012/02/"> February 2012 &nbsp;(6)</option>
+	<option value="https://insinuator.net/2012/01/"> January 2012 &nbsp;(4)</option>
+	<option value="https://insinuator.net/2011/12/"> December 2011 &nbsp;(7)</option>
+	<option value="https://insinuator.net/2011/11/"> November 2011 &nbsp;(7)</option>
+	<option value="https://insinuator.net/2011/10/"> October 2011 &nbsp;(6)</option>
+	<option value="https://insinuator.net/2011/09/"> September 2011 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2011/08/"> August 2011 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2011/07/"> July 2011 &nbsp;(6)</option>
+	<option value="https://insinuator.net/2011/06/"> June 2011 &nbsp;(4)</option>
+	<option value="https://insinuator.net/2011/05/"> May 2011 &nbsp;(4)</option>
+	<option value="https://insinuator.net/2011/04/"> April 2011 &nbsp;(5)</option>
+	<option value="https://insinuator.net/2011/03/"> March 2011 &nbsp;(5)</option>
+	<option value="https://insinuator.net/2011/01/"> January 2011 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2010/12/"> December 2010 &nbsp;(6)</option>
+	<option value="https://insinuator.net/2010/11/"> November 2010 &nbsp;(5)</option>
+	<option value="https://insinuator.net/2010/10/"> October 2010 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2010/09/"> September 2010 &nbsp;(4)</option>
+	<option value="https://insinuator.net/2010/08/"> August 2010 &nbsp;(5)</option>
+	<option value="https://insinuator.net/2010/07/"> July 2010 &nbsp;(6)</option>
+	<option value="https://insinuator.net/2010/06/"> June 2010 &nbsp;(2)</option>
+	<option value="https://insinuator.net/2009/12/"> December 2009 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2009/11/"> November 2009 &nbsp;(1)</option>
+	<option value="https://insinuator.net/2009/10/"> October 2009 &nbsp;(3)</option>
+	<option value="https://insinuator.net/2026/03/">  0 &nbsp;(1)</option>
+
+		</select>
+
+			<script type="text/javascript">
+/* <![CDATA[ */
+
+( ( dropdownId ) => {
+	const dropdown = document.getElementById( dropdownId );
+	function onSelectChange() {
+		setTimeout( () => {
+			if ( 'escape' === dropdown.dataset.lastkey ) {
+				return;
+			}
+			if ( dropdown.value ) {
+				document.location.href = dropdown.value;
+			}
+		}, 250 );
+	}
+	function onKeyUp( event ) {
+		if ( 'Escape' === event.key ) {
+			dropdown.dataset.lastkey = 'escape';
+		} else {
+			delete dropdown.dataset.lastkey;
+		}
+	}
+	function onClick() {
+		delete dropdown.dataset.lastkey;
+	}
+	dropdown.addEventListener( 'keyup', onKeyUp );
+	dropdown.addEventListener( 'click', onClick );
+	dropdown.addEventListener( 'change', onSelectChange );
+})( "archives-dropdown-5" );
+
+//# sourceURL=WP_Widget_Archives%3A%3Awidget
+/* ]]> */
+</script>
+</section>						</div>
+					</div>
+				</nav><!-- #site-navigation -->
+
+				<div class="site-search">
+					<a href="#" class="search-toggle">
+						<svg class="icon icon--search">
+							<use xlink:href="#search"></use>
+						</svg>
+					</a>
+					
+<form role="search" method="get" class="search-form" action="https://insinuator.net/">
+	<label>
+		<span class="screen-reader-text">Search for:</span>
+		<input type="search" class="search-field" placeholder="Search …" value="" name="s">
+	</label>
+	<button type="submit" class="search-submit">
+		Search	</button>
+</form>
+				</div>
+
+				<section class="ernw-universe-links">
+				  <ul class="inline">
+				    <li>
+				      <a class="svg-link link-ernw" alt="ERNW" href="https://www.ernw.de" target="_blank"><span class="screen-reader-text">ERNW</span></a>
+				    </li>
+				    <li>
+				      <a class="svg-link link-research" alt="ERNW Research" href="https://www.ernw-research.de" target="_blank"><span class="screen-reader-text">ERNW Research</span></a>
+                    </li>
+				  </ul>
+				</section>
+			</header><!-- #masthead -->
+		</div>
+
+		<div id="content" class="site-content">
+
+	<div id="primary" class="content-area">
+		<main id="main" class="site-main" role="main">
+
+		
+<article id="post-15654" class="post-15654 post type-post status-publish format-standard hentry category-misc">
+	
+	<header class="entry-header">
+					<nav class="back-to-home">
+  <a class="back-to-home-link" href="https://insinuator.net/#post-15654">
+    <svg class="icon icon--back">
+      <use xlink:href="#back"></use>
+    </svg>
+    <span class="screen-reader-text">Back</span>
+  </a>
+</nav>
+		
+		<div class="entry-categories">
+			<span class="cat-links"><a href="https://insinuator.net/category/misc/" rel="category tag">Misc</a></span>		</div>
+
+					<div class="entry-meta">
+				<span class="posted-on"><a href="https://insinuator.net/2025/12/bluetooth-headphone-jacking-full-disclosure-of-airoha-race-vulnerabilities/" rel="bookmark"><time class="entry-date published updated" datetime="2025-12-28T00:29:15+01:00">December 28, 2025</time></a></span><span class="byline"> by <span class="author vcard"><a class="url fn n" href="https://insinuator.net/author/dheinze/">Dennis Heinze</a></span></span>			</div><!-- .entry-meta -->
+		
+		<h1 class="entry-title">Bluetooth Headphone Jacking: Full Disclosure of Airoha RACE Vulnerabilities</h1>	</header><!-- .entry-header -->
+
+	<div class="entry-content">
+		
+                
+                    <!--begin code -->
+
+                    
+                    <span class="pp-multiple-authors-boxes-wrapper pp-multiple-authors-wrapper pp-multiple-authors-layout-inline multiple-authors-target-the-content box-post-id-15332 box-instance-id-1 ppma_boxes_15332" data-post_id="15332" data-instance_id="1" data-additional_class="pp-multiple-authors-layout-inline.multiple-authors-target-the-content" data-original_class="pp-multiple-authors-boxes-wrapper pp-multiple-authors-wrapper box-post-id-15332 box-instance-id-1">
+                                                <span class="ppma-layout-prefix"></span>
+                        <span class="ppma-author-category-wrap">
+                                                                                                                                    <span class="ppma-category-group ppma-category-group-1 category-index-0">
+                                                                                                                                                                                                                                                                                                                                                                                                
+                                                                                                                    
+                                                            <span class="pp-author-boxes-avatar-details">
+                                                                <span class="pp-author-boxes-name multiple-authors-name"><a href="https://insinuator.net/author/dheinze/" rel="author" title="Dennis Heinze" class="author url fn">Dennis Heinze</a>, </span>                                                                                                                                                                                                
+                                                                                                                                
+                                                                                                                            </span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                            
+                                                                                                                    
+                                                            <span class="pp-author-boxes-avatar-details">
+                                                                <span class="pp-author-boxes-name multiple-authors-name"><a href="https://insinuator.net/author/fsteinmetz/" rel="author" title="Frieder Steinmetz" class="author url fn">Frieder Steinmetz</a></span>                                                                                                                                                                                                
+                                                                                                                                
+                                                                                                                            </span>
+                                                                                                                                                                                                                                                                                                                                                                                            </span>
+                                                                                                                        </span>
+                        <span class="ppma-layout-suffix"></span>
+                                            </span>
+                    <!--end code -->
+                    
+                
+                            
+        <p>About six months ago we released a <a href="https://insinuator.net/2025/06/airoha-bluetooth-security-vulnerabilities/">security advisory</a> on this blog about vulnerabilities in Airoha-based Bluetooth headphones and earbuds. Back then, we didn’t release all technical details to give vendors more time to release updates and users time to patch their devices. Around the time of the initial partial disclosure in the beginning of June, Airoha put out an SDK release for their customers that mitigates the vulnerabilities. Now, half a year later, we finally want to publish the technical details and release a tool for researchers and users to continue researching and check whether their devices are vulnerable.</p>
+<p>This blog post is about CVE-2025-20700, CVE-2025-20701, and CVE-2025-20702.</p>
+<p>Alongside this blog post, we also released a <a href="https://ernw.de/en/publications.html">white paper</a>. It contains some more technical details, as well as information on how to check whether your device might be affected.</p>
+<p><span id="more-15654"></span></p>
+<h2 id="introduction">Introduction</h2>
+<p>Bluetooth headphones and earbuds are some of the most widely used Bluetooth peripherals. As such, they are an interesting target for security research. What is possible when such a device is compromised? What could an attacker achieve? Are Bluetooth headphones a target that’s worth putting in time and resources? After initially discovering an interesting target we were asking ourselves these questions.</p>
+<p>During our research we identified three vulnerabilities in a common set of Bluetooth SoCs that are used in a variety of Bluetooth headphones and earbuds. In this blog post, we want to provide a brief technical overview over the vulnerabilities, outline the implications, and discuss the difficulties of disclosure and patching. Alongside this post, we also release a <a href="https://ernw.de/en/publications.html">white paper</a> and <a href="https://github.com/auracast-research/race-toolkit">RACE Toolkit</a>, a tool for researchers and users to verify whether a device is vulnerable. There’s also a talk at <a href="https://events.ccc.de/congress/2025/hub/en/event/detail/bluetooth-headphone-jacking-a-key-to-your-phone">39c3</a>, if you prefer watching videos.</p>
+<p><a href="www.airoha.com/">Airoha</a> is a vendor that, amongst other things, builds Bluetooth SoCs and offers reference designs and implementations incorporating these chips. They have become a large supplier in the Bluetooth audio space, especially in the area of True Wireless Stereo (TWS) earbuds. Several reputable headphone and earbud vendors have built products based on Airoha’s SoCs and reference implementations using Airoha’s SDK. If you are wearing earbuds right now, there is a non-zero chance they are running an Airoha chip.</p>
+<p>In previous <a href="https://insinuator.net/2025/01/auracast-part1/">Bluetooth related research</a> we stumbled upon a pair of such headphones. During the process of obtaining the firmware for further research we initially discovered the custom Bluetooth protocol called <strong>RACE</strong>. We found that this protocol has various powerful capabilities, such as allowing us to read from and write to arbitrary locations in both flash and RAM. Additionally, it was exposed over Bluetooth BR/EDR (also known as Bluetooth Classic) and Bluetooth Low Energy. In both cases, pairing was not required. As such, an attacker within Bluetooth range can connect to the device and manipulate RAM and flash contents without prior authentication.</p>
+<p>The lack of pairing does not only enable unauthenticated attackers to use the RACE protocol, it constitutes a vulnerability on its own. An attacker can connect to the device and, for example, use the Bluetooth Hands-Free Profile (HfP) to send or receive audio. This might allow eavesdropping via the device’s microphone.</p>
+<h2 id="background">Background</h2>
+<p>Before we get into the technical details of the vulnerability, here’s a quick refresher about some Bluetooth terminology. If you’re already familiar with Bluetooth pairing, RFCOMM, and GATT, or if the Bluetooth Core specification is part of you nighttime reading, then feel free to skip to the next section.</p>
+<p>Bluetooth is effectively two logically independent protocol stacks operating on the 2.4 GHz ISM band: <strong>Bluetooth BR/EDR</strong>, also known as <em>Bluetooth Classic</em>, and the newer, low-power optimized <strong>Bluetooth Low Energy</strong>, often referred to as <em>BLE</em>.</p>
+<h3 id="pairing">Pairing</h3>
+<p>Bluetooth devices use <em>pairing</em> to establish shared key material for authentication and encryption. In Bluetooth Classic, pairing occurs during connection establishment through the Link Manager Protocol (LMP). The output of pairing is a Link Key. This Link Key is stored on the Host and provided to the controller whenever a secure connection is to be established.</p>
+<p>In BLE, pairing is handled by the Security Manager Protocol (SMP) operating over a fixed L2CAP channel. One major difference here is that in BLE, the pairing is performed on the host part of the stack, in Bluetooth Classic on the controller part.</p>
+<p>As we’ll see in the following section, the Airoha-based devices we checked often didn’t enforce authentication for either of the two technologies.</p>
+<h3 id="bluetooth-addressing">Bluetooth Addressing</h3>
+<p>Every Bluetooth device is identified at the Link Layer by a Bluetooth Device Address (often referred to as <code>BD_ADDR</code>). This address works similarly to MAC addresses in other wireless systems. It is six bytes long for both Bluetooth Classic and BLE. However, there are some differences in addressing in these two technologies.</p>
+<p>In Bluetooth Classic, the address is (or should be) globally unique and assigned by the manufacturer. The first 24 bits of the address contain a manufacturer identifier (the OUI – Organizationally Unique Identifier), the other bits are device specific. This address is static and is required to establish a connection with the device. Knowledge of the device address can sometimes be beneficial for an attacker. Even when a device is not discoverable, the knowledge of the address is enough to establish a connection if the device is connectable. The static nature of the address can also become an issue in regard to privacy.</p>
+<p>BLE supports various types of addresses. A Public Device Address that is similar to the <code>BD_ADDR</code> in Bluetooth Classic or a type of Random Device Addresses.</p>
+<p>A Random Device Address may be either static or private. Private addresses are regenerated periodically to prevent long-term tracking and come in two forms:</p>
+<ul>
+<li>
+<p>Resolvable Private Addresses (RPA), which include a hash derived from the device’s Identity Resolving Key (IRK). RPAs can be recognized by paired devices but appear random to others.</p>
+</li>
+<li>
+<p>Non-Resolvable Private Addresses (NRPA), which are generated randomly and cannot be resolved by any party, used primarily for anonymous advertising.</p>
+</li>
+</ul>
+<p>In dual-mode devices that support both Bluetooth Classic and BLE, these addressing systems are independent. A single physical device therefore typically has two addresses: one Classic BD_ADDR and one BLE address (public or random).</p>
+<h3 id="rfcomm">RFCOMM</h3>
+<p>RFCOMM provides a byte-stream transport that emulates a serial interface over Bluetooth Classic. It operates on top of L2CAP. RFCOMM supports multiple logical data channels multiplexed over a single Bluetooth connection. Channels can be identified via their UUID. RFCOMM often serves as a transparent transport for applications expecting a serial-like interface over a Bluetooth connection.</p>
+<h3 id="gatt">GATT</h3>
+<p>In BLE, application data is mainly exchanged through the Generic Attribute Profile (GATT). GATT operates on top of the Attribute Protocol (ATT), which provides basic operations, such as <em>Read</em>, <em>Write</em>, or <em>Notify</em> over a fixed L2CAP channel.</p>
+<p>A GATT server can expose multiple services that are identified by a UUID. Each service in turn can hold one or more characteristics that are also identified by a UUID. The characteristics can have different access configuration, such as whether they are readable, writable, subscribable, or whether a secure connection is required to interact with them.</p>
+<p>A GATT client can discover and enumerate available services and interact with them by issuing ATT requests or subscribing to notifications.</p>
+<p>In real-world applications, GATT often serves the purpose of an underlying layer for a byte-stream transport (similar to RFCOMM or L2CAP in Bluetooth Classic). This stems from the fact that, in BLE, RFCOMM or L2CAP are not always directly accessible on the application layer. To establish a byte-stream transport, a characteristic that allows reading and writing, or subscribing and writing is created. Sending data then works by writing to the characteristic, receiving data by receiving subscription notification.</p>
+<p>The image below depicts a simplified high level Bluetooth stack, where the blue components are BLE components, and the green ones related to Bluetooth Classic<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+<p><img fetchpriority="high" decoding="async" src="https://insinuator.net/wp-content/uploads/2025/12/btstack-783x1024.png" alt="Bluetooth Stack" width="640" height="837" class="aligncenter size-large wp-image-15680" srcset="https://insinuator.net/wp-content/uploads/2025/12/btstack-783x1024.png 783w, https://insinuator.net/wp-content/uploads/2025/12/btstack-229x300.png 229w, https://insinuator.net/wp-content/uploads/2025/12/btstack-768x1005.png 768w, https://insinuator.net/wp-content/uploads/2025/12/btstack.png 963w" sizes="(max-width: 640px) 100vw, 640px"></p>
+<hr>
+<p>Alright, now that we went over the basics, let’s get into the vulnerabilities!</p>
+<h2 id="missing-bluetooth-pairing">Missing Bluetooth Pairing</h2>
+<p>In practice, Bluetooth security is largely invisible to users. Pairing happens once, and usually it happened a long time ago. After that, reconnecting happens silently and automatic. If a device reconnects successfully, it is assumed to be legitimate.</p>
+<p>This assumption is not unreasonable when both sides of the connection are well-designed and properly authenticated. The problem arises when one side accepts incoming connections without prior pairing. Or, as we will see later on, when pairing information can be stolen, and a trusted device impersonated.</p>
+<p>In the course of analyzing Airoha-based headphones, we discovered that many devices accept Bluetooth Low Energy and Bluetooth Classic connections without enforcing authentication. Any nearby device can connect, interact with exposed services, and in some cases issue critical commands, all without pairing, bonding, or user interaction.</p>
+<p>One possible scenario is that an attacker can connect to a pair of headphones and sniff and record the microphone. However, the implications largely depend on the scenario and the target device itself. If the device only allows one Bluetooth connection at a time, and the owner is currently listening to music, they will notice the connection drop. If the device accepts multiple connections, the original audio connection is still likely to drop when the microphone is enabled on the attacker connection.</p>
+<p>Depending on the functionalities of the target device, unauthenticated Bluetooth connections might give the attacker other capabilities.</p>
+<p>Airoha issued two separate CVEs for the Bluetooth authentication issue. One for Bluetooth Classic, and one for BLE:</p>
+<ul>
+<li>CVE-2025-20700: Missing Authentication for GATT Services</li>
+<li>CVE-2025-20701: Missing Authentication for Bluetooth BR/EDR</li>
+</ul>
+<p>During our survey, we found some Airoha-based devices that were not vulnerable to the Bluetooth Classic vulnerability (CVE-2025-20701). A notable example here are the Jabra Elite 8 Active earbuds. We assume that these vendors adapted the SDK code to enforce pairing, or changed default configurations of the SDK to secure the device. For some models we found that the pairing was unreliable. Sometimes, the device did not accept HfP or RACE connections without prior pairing, sometimes it did. An example for such a device are the Bose QuietComfort Earbuds.</p>
+<p>This authentication issue becomes more interesting when we consider that it exposes the RACE protocol to unauthenticated attackers in proximity of the device.</p>
+<h2 id="the-race-protocol">The RACE Protocol</h2>
+<p>We initially discovered the RACE protocol during our <a href="https://insinuator.net/2025/01/auracast-part1/">Bluetooth Auracast</a> research. To play around with Auracast, we acquired a <a href="https://www.moor-audio.com/products/tv-hearmore-bluetooth-auracast-audio-transmitter">MoerLab Auracast transmitter</a> and a compatible pair of headphones.</p>
+<p>While analyzing the USB traffic between the transmitter and its Windows configuration and firmware update utility, we observed a stream of interesting USB HID packets. This looked like a custom protocol. The screenshot below shows a USB capture. In this case, the response to the <em>get buildversion</em> command is shown.</p>
+<p><img decoding="async" src="https://insinuator.net/wp-content/uploads/2025/12/wireshark_hid-1024x524.png" alt="Wireshark HID Traffic" width="640" height="328" class="size-large wp-image-15675" srcset="https://insinuator.net/wp-content/uploads/2025/12/wireshark_hid-1024x524.png 1024w, https://insinuator.net/wp-content/uploads/2025/12/wireshark_hid-300x154.png 300w, https://insinuator.net/wp-content/uploads/2025/12/wireshark_hid-768x393.png 768w, https://insinuator.net/wp-content/uploads/2025/12/wireshark_hid-1536x786.png 1536w, https://insinuator.net/wp-content/uploads/2025/12/wireshark_hid-2048x1049.png 2048w" sizes="(max-width: 640px) 100vw, 640px"></p>
+<p>During a firmware update we noticed there were a lot of messages with the same structure. The beginning of the packets were mostly the same (<code>15 5A 0e 02 02 04</code>), then there was an incremental value (e.g., <code>00 30 26 00</code> or <code>0x263000</code> in little endian) followed by a larger binary blob.</p>
+<p><img decoding="async" src="https://insinuator.net/wp-content/uploads/2025/12/hid_fota_bytes-1024x513.png" alt="HID FOTA Bytes" width="640" height="321" class="size-large wp-image-15677" srcset="https://insinuator.net/wp-content/uploads/2025/12/hid_fota_bytes-1024x513.png 1024w, https://insinuator.net/wp-content/uploads/2025/12/hid_fota_bytes-300x150.png 300w, https://insinuator.net/wp-content/uploads/2025/12/hid_fota_bytes-768x385.png 768w, https://insinuator.net/wp-content/uploads/2025/12/hid_fota_bytes-1536x769.png 1536w, https://insinuator.net/wp-content/uploads/2025/12/hid_fota_bytes-2048x1026.png 2048w" sizes="(max-width: 640px) 100vw, 640px"></p>
+<p>It turns out the larger blobs were incremental parts of the firmware update file! The rest, we assumed, is the protocol message, and the incremental part might be the address the file is written to.</p>
+<p>At this point, we were hooked and wanted to learn more about the protocol. Fortunately, someone already built the <a href="https://github.com/ramikg/airoha-firmware-parser">airoha-firmware-parser</a>, a tool to unpack these Airoha firmware update files, also called FOTA images. This allowed us to start reverse-engineering the firmware.</p>
+<p>After digging through the firmware and various mobile companion apps for different headphone models, we found that the name of the protocol is RACE.</p>
+<h3 id="packet-structure">Packet Structure</h3>
+<p>The RACE protocol is encapsulated differently depending on the transport but the core packet structure remains consistent. The payload differs drastically depending on the command. The general packet structure is depicted below:</p>
+<p><img loading="lazy" decoding="async" src="https://insinuator.net/wp-content/uploads/2025/12/race_pkt-1024x177.png" alt="RACE Packet" width="640" height="111" class="size-large wp-image-15681" srcset="https://insinuator.net/wp-content/uploads/2025/12/race_pkt-1024x177.png 1024w, https://insinuator.net/wp-content/uploads/2025/12/race_pkt-300x52.png 300w, https://insinuator.net/wp-content/uploads/2025/12/race_pkt-768x132.png 768w, https://insinuator.net/wp-content/uploads/2025/12/race_pkt-1536x265.png 1536w, https://insinuator.net/wp-content/uploads/2025/12/race_pkt-2048x353.png 2048w" sizes="auto, (max-width: 640px) 100vw, 640px"></p>
+<p>Every RACE packet begins with a 6-byte header followed by a variable-length payload:</p>
+<table>
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>Size</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Head</strong></td>
+<td>1 Byte</td>
+<td>Typically <code>0x05</code> for standard commands, <code>0x15</code> for firmware updates.</td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>1 Byte</td>
+<td><code>0x5A</code> for Request, <code>0x5B</code> for Response.</td>
+</tr>
+<tr>
+<td><strong>Length</strong></td>
+<td>2 Bytes</td>
+<td>The length of the subsequent data payload.</td>
+</tr>
+<tr>
+<td><strong>CMD</strong></td>
+<td>2 Bytes</td>
+<td>The Command ID determining the operation.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="race-commands">RACE Commands</h3>
+<p>We found that there a many different RACE commands, so we didn’t have time to look at and reverse engineer all of them. However, we identified a few that are relevant with regard to security. Many other commands handle things like configuring the ANC (Active Noise Cancellation), or configuring audio properties.</p>
+<p>The four command types we are going to explain in more details are the following:</p>
+<ol type="1">
+<li><strong>Get Build Version (<code>0x1E08</code>)</strong>: Returns the SoC model, SDK version, and build time stamp. This is excellent for fingerprinting.</li>
+<li><strong>Read Flash (<code>0x0403</code>)</strong>: Allows reading pages from the flash memory. The arguments typically include a storage type, size (in pages, not bytes), and a 4-byte address.</li>
+<li><strong>Read/Write RAM (<code>0x1680</code> / <code>0x1681</code>)</strong>: Provides arbitrary read/write access to the entire memory map, including memory-mapped I/O (MMIO) registers and RAM.</li>
+<li><strong>Get BD_ADDR (<code>0x0CD5</code>)</strong>: Retrieves the device’s public Bluetooth Classic address. This is relevant for some of our proof of concepts, but also interesting with regard to privacy.</li>
+</ol>
+<h3 id="transports">Transports</h3>
+<p>RACE is multiplexed across multiple interfaces. We initially found it over a USB HID connection. Then we found it is also available via BLE and Bluetooth Classic.</p>
+<ul>
+<li><strong>USB HID</strong>: Uses Report IDs <code>0x06</code> (Host to Device) and <code>0x07</code> (Device to Host).</li>
+<li><strong>Bluetooth Classic (RFCOMM)</strong>: Exposed via a specific RFCOMM channel (often channel 21). We identified several vendor-specific UUIDs targeting this service:
+<ul>
+<li>Default: <code>00000000-0000-0000-0099-AABBCCDDEEFF</code></li>
+<li>Sony: <code>8901DFA8-5C7E-4D8F-9F0C-C2B70683F5F0</code></li>
+<li>Bose: <code>2D064AA9-32B5-4970-865C-643742BD2862</code></li>
+</ul>
+</li>
+<li><strong>Bluetooth Low Energy (GATT)</strong>: Exposed via a specific GATT service. Commands are written to the TX characteristic, and responses are received via the RX characteristic. Here we only found one vendor-specific for Sony. The other devices use the default UUID.
+<ul>
+<li>Default: <code>5052494D-2DAB-0341-6972-6F6861424C45</code>.</li>
+<li>Sony: <code>dc405470-a351-4a59-97d8-2e2e3b207fbb</code>.</li>
+</ul>
+</li>
+</ul>
+<p>Visiting our Bluetooth stack image from above, the RACE protocol sits either on top of GATT, when the BLE transport is used, or on top of RFCOMM, when Bluetooth Classic is used.</p>
+<p><img loading="lazy" decoding="async" src="https://insinuator.net/wp-content/uploads/2025/12/btstack_with_race-715x1024.png" alt="Bluetooth Stack with RACE" width="640" height="917" class="size-large wp-image-15679" srcset="https://insinuator.net/wp-content/uploads/2025/12/btstack_with_race-715x1024.png 715w, https://insinuator.net/wp-content/uploads/2025/12/btstack_with_race-209x300.png 209w, https://insinuator.net/wp-content/uploads/2025/12/btstack_with_race-768x1101.png 768w, https://insinuator.net/wp-content/uploads/2025/12/btstack_with_race.png 963w" sizes="auto, (max-width: 640px) 100vw, 640px"></p>
+<p>Not every device we saw exposed RACE over all these transports. However, this is likely because the interface itself was not exposed. For example, the Bose QuietComfort Earbuds or the Jabra Elite 8 Active do not seem to have BLE enabled, which effectively means that GATT is not available. Most of the headphone models do not have a USB interface, or only expose it for charging, which eliminates this transport.</p>
+<h2 id="impact">Impact</h2>
+<p>The later parts of this chapter will discuss the impact from a headphone user’s perspective in more detail. First we want to recap which vulnerability attackers can use as leverage for which capabilities.</p>
+<p><strong>1. CVE-2025-20700: Missing Authentication for GATT (BLE)</strong></p>
+<p>An attacker can discover and connect to headphones in proximity via BLE, e.g., on a train or in a café. Connection establishment usually happens silently without the user noticing. The lack of authentication provides covert access to the RACE protocol but does not provide any meaningful access if RACE is out of the picture.</p>
+<p><strong>2. CVE-2025-20701: Missing Authentication for Bluetooth Classic (BR/EDR)</strong></p>
+<p>Similar to the BLE flaw, this allows unauthorized connections. While Bluetooth Classic connections are sometimes more visible (and might interrupt audio streams), this vector is interesting even without the RACE protocol, as the attacker can still establish two-way audio connections to the headphones or use any other Bluetooth profile the headphones expose.</p>
+<p><strong>3. CVE-2025-20702: Critical Capabilities in Custom Protocol</strong></p>
+<p>The RACE protocol itself, accessed with or without relying on the previous two CVEs provides powerful commands intended for factory debugging. It allows reading and writing to the device’s Flash memory and RAM. It is therefore possible to permanently alter devices and extract sensitive configuration data.</p>
+<h2 id="attacking-the-headphones">Attacking the Headphones</h2>
+<p>To compromise a pair of headphones, an attacker first needs to connect to them. Taking advantage of <code>CVE-2025-20700</code>, for the initial connection is considerably easier than using <code>CVE-2025-20701</code>. The reason for this is the fact that headphones typically advertise their presence via BLE. Anyone in range can scan for BLE devices, connect to them and use the appropriate GATT service to speak the RACE protocol. In contrast, devices will not typically announce their presence or respond to inquires on Bluetooth Classic, except when they are explicitly set to discoverable or in pairing mode. To establish a connection the device’s Bluetooth Classic address has to be known. Finding the address of headphones in proximity to the attacker requires special purpose hardware (such as the <a href="https://greatscottgadgets.com/ubertoothone/">Ubertooth One</a>). It is however worth noting, that for many affected devices the Bluetooth Classic address can be inquired via RACE. This means attackers that want to establish a Bluetooth Classic connection can simply connect via BLE first and use RACE to find out the Classic address.</p>
+<h3 id="eavesdropping">Eavesdropping</h3>
+<p>Using Bluetooth Classic and the Bluetooth Hands-Free Profile (HfP) attackers can use the headphone’s microphone. This is a direct consequence of the broken or missing authentication and does not rely on the RACE protocol’s capabilities. As noted earlier, establishing a Bluetooth Classic audio connection usually disrupts any pre-existing connection. In case the victim is actively listening to audio they will notice that something is happening to their headphones.</p>
+<h2 id="data-extraction">Data Extraction</h2>
+<p>As mentioned earlier, volatile (RAM) and non-volatile (flash) storage can be read using RACE. Reading RAM allows an attacker to extract runtime information with different sensitive nature. As a proof of concept, we demonstrated that we can read out metadata related to the currently playing media. This means we can find out what the user is currently listening to.</p>
+<p><img loading="lazy" decoding="async" src="https://insinuator.net/wp-content/uploads/2025/12/mediainfo_ts-1024x429.png" alt="RACE Toolkit Mediainfo Command" width="640" height="268" class="size-large wp-image-15678" srcset="https://insinuator.net/wp-content/uploads/2025/12/mediainfo_ts-1024x429.png 1024w, https://insinuator.net/wp-content/uploads/2025/12/mediainfo_ts-300x126.png 300w, https://insinuator.net/wp-content/uploads/2025/12/mediainfo_ts-768x322.png 768w, https://insinuator.net/wp-content/uploads/2025/12/mediainfo_ts-1536x643.png 1536w, https://insinuator.net/wp-content/uploads/2025/12/mediainfo_ts.png 1944w" sizes="auto, (max-width: 640px) 100vw, 640px"></p>
+<p>Access to flash data allows extracting the firmware and any other data stored on the flash. This includes information on the devices the headphones have been paired with. This is an important prerequisite for other attacks, that will be discussed in the next section.</p>
+<h3 id="arbitrary-code-execution">Arbitrary Code Execution</h3>
+<p>Writing to RAM or flash sections that hold executable code permits attackers to run any custom code on the device. Temporarily injecting code into RAM is of questionable use, considering the capabilities attackers have even without doing that.</p>
+<p>Permanently infecting headphones by writing code to their flash could however be interesting to attackers. However, this process is much more complex. The flash write command restricts the areas that can be written to. In fact, this restricted area is part of the firmware update process. We can only write to the firmware update partition. Then the update process has to be triggered. This requires the ability to create a valid firmware image. However, with the given flash read capabilities, the required symmetric keys can be read and used to encrypt a firmware image. In practice, this process takes some time. Depending on the size of the firmware image, we observed that flashing the image via RFCOMM takes about 3 to 5 minutes. Via GATT the same process likely takes even longer.</p>
+<h2 id="attacking-the-phone">Attacking the Phone</h2>
+<p>Up to this point, the damage is confined to the headphones themselves. That is already undesirable, but it gets worse once a more interesting target, such as the user’s phone gets involved. When the three vulnerabilities are chained together, the impact can be shifted from “hacking headphones” to “compromising the phone.”</p>
+<p>To carry out the attack the following steps have to be performed:</p>
+<p><strong>Step 1: Connect (CVE-20700/20701)</strong> The attacker is in physical proximity and silently connects to a pair of headphones via BLE or Classic Bluetooth.</p>
+<p><strong>Step 2: Exfiltrate (CVE-20702)</strong> Using the unauthenticated connection, the attacker uses the RACE protocol to (partially) dump the flash memory of the headphones.</p>
+<p><strong>Step 3: Extract</strong> Inside that memory dump resides a connection table. This table includes the names and addresses of paired devices. More importantly, it also contains the Bluetooth Link Key. This is the cryptographic secret that a phone and headphones use to recognize and trust each other.</p>
+<p><em>Note: Once the attacker has this key, they no longer need access to the headphones.</em></p>
+<p><strong>Step 4: Impersonate</strong> The attacker’s device now connects to the targets phone, pretending to be the trusted headphones. This involves spoofing the headphones Bluetooth address and using the extracted link-key.</p>
+<p>Once connected to the phone the attacker can proceed to interact with it from the privileged position of a trusted peripheral.</p>
+<p>Many of the proof of concepts that are targeted at the phone require a proper implementation of Bluetooth profiles, such as the Hands-Free Profile. For these attacks, the tooling was based on <a href="https://bluekitchen-gmbh.com/">BTstack</a>, which is a great implementation of the Bluetooth host stack <a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</p>
+<h3 id="data-extraction-1">Data Extraction</h3>
+<p>Using HfP commands, the attacker can access different types of information. Some are restricted by the permissions the user gave during initial pairing to the headphones, some are always available.</p>
+<p>Using the HfP <code>AT+CNUM</code>, the attacker can obtain the victim’s phone number. If access to the phone book was granted during initial pairing, the attacker can also access contact lists and call history.</p>
+<p>The following screenshot shows the output of a tool based on the <a href="https://github.com/bluekitchen/btstack/blob/master/example/hfp_hf_demo.c">btstack HfP example</a>. A connection to a victim phone is established and the <code>AT+CNUM</code> command is sent. The device responds with the phone number.</p>
+<p><img loading="lazy" decoding="async" src="https://insinuator.net/wp-content/uploads/2025/12/atcnum-1024x908.png" alt="HfP AT+CNUM Command" width="640" height="568" class="size-large wp-image-15676" srcset="https://insinuator.net/wp-content/uploads/2025/12/atcnum-1024x908.png 1024w, https://insinuator.net/wp-content/uploads/2025/12/atcnum-300x266.png 300w, https://insinuator.net/wp-content/uploads/2025/12/atcnum-768x681.png 768w, https://insinuator.net/wp-content/uploads/2025/12/atcnum-1536x1363.png 1536w, https://insinuator.net/wp-content/uploads/2025/12/atcnum.png 1710w" sizes="auto, (max-width: 640px) 100vw, 640px"></p>
+<h3 id="remote-control">Remote Control</h3>
+<p>Using the HfP <code>AT+BVRA</code> command, the attacker can trigger voice assistants (e.g., Siri or Google Assistant). Depending on the settings on the phone, this can be used to send text messages, make calls, or perform other actions on the phone.</p>
+<p>On iOS, Siri is enabled on the lock screen by default. However, in the locked state the possible actions that can be performed are restricted. It is possible to send text messages or make calls. Other information, such as location information, or access to notes is not possible while the phone is locked.</p>
+<h3 id="hijacking-calls">Hijacking Calls</h3>
+<p>Using the calling features of the Hands-Free Protocol, an attacker can make calls or accept calls. HfP also offer various other possible actions on phone calls, such as merging calls, holding calls, or obtaining the call status.</p>
+<p>This allows an attacker to silently accept a call and receive the audio stream of the call. Alternatively, an attacker could call expensive premium numbers to cause financial damage.</p>
+<h3 id="eavesdropping-1">Eavesdropping</h3>
+<p>In addition to the previous attacks, the phone capabilities also allow for eavesdropping. The attacker can trigger a call to an attacker-controlled phone and phone number. Once the call is established, the Bluetooth audio connection is dropped.</p>
+<p>In consequence there will be an active phone call to the attacker using the victim phone’s internal microphone.</p>
+<h3 id="proof-of-concept">Proof of Concept</h3>
+<p>At 39c3 we will show how these capabilities can be used to take over the victim’s WhatsApp and Amazon accounts. Once the video is uploaded we will link it here with the correct time code for the demonstration.</p>
+<p>If you would like to check whether your device is still affected, you can check chapter 6 of our <a href="https://ernw.de/en/publications.html">white paper</a> that we released alongside this blog post.</p>
+<h2 id="vulnerable-devices">Vulnerable Devices</h2>
+<p>During this research we conducted a survey to identify what devices are affected by the vulnerabilities. In a first instance, this requires identifying devices with Airoha Bluetooth SoCs. This is a task that can be done by passive reconnaissance. For example, by examining FCC reports which usually contain photographs of the PCBs inside the device. In such cases, it might be possible to identify the SoC. Other sources can be tear-down or disassembly blogs. One notable example is the blog <a href="https://52audio.com">52audio.com</a>, which provides high-resolution tear-down pictures of many audio devices. Searching for Airoha SoCs on their page revealed many potential candidates for the vulnerabilities. Lastly, Bluetooth SIG members have the possibility to search for devices with specific Bluetooth SoCs. However, as non-members, this search was not available to us.</p>
+<p>Once potential devices are identified, the more difficult step is to confirm whether they are in fact vulnerable. For this purpose, we acquired several devices. However, it was not possible for us to buy all potential devices. As such, only a subset of devices could be confirmed to be affected.</p>
+<p>During our survey, some Airoha-based devices that were not vulnerable to the Bluetooth Classic vulnerability (CVE-2025-20701) were found. A notable example here are the Jabra Elite 8 Active earbuds. The assumption is that these vendors adapted the SDK code to enforce pairing, or changed default configurations of the SDK to secure the device. For some models we found that the pairing was unreliable. Sometimes, the device did not accept HfP or RACE connections without prior pairing, sometimes it did. An example for such a device are the Bose QuietComfort Earbuds.</p>
+<p>Not every device exposed RACE over all described transports. However, this is likely because the interface itself was not exposed. For example, the Bose QuietComfort Earbuds or the Jabra Elite 8 Active do not seem to have BLE enabled, which effectively means that GATT is not available.</p>
+<p>In the initial partial disclosure the following list of vulnerable devices was published. This list is not a complete list of affected devices. It only includes devices that we managed to verify. For this purpose, we acquired some of the devices, or asked colleagues and friends whether we could check their devices. For some devices, it was only possible to verify the vulnerability via BLE, as this check can be conducted with a smartphone and does not necessarily require a computer.</p>
+<ul style="columns: 2; -webkit-columns: 2; -moz-columns: 2;">
+<li>
+Beyerdynamic Amiron 300
+</li>
+<li>
+Bose QuietComfort Earbuds<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>
+</li>
+<li>
+EarisMax Bluetooth Auracast Sender
+</li>
+<li>
+Jabra Elite 8 Active<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>
+</li>
+<li>
+JBL Endurance Race 2
+</li>
+<li>
+JBL Live Buds 3
+</li>
+<li>
+Jlab Epic Air Sport ANC
+</li>
+<li>
+Marshall ACTON III
+</li>
+<li>
+Marshall MAJOR V
+</li>
+<li>
+Marshall MINOR IV
+</li>
+<li>
+Marshall MOTIF II
+</li>
+<li>
+Marshall STANMORE III
+</li>
+<li>
+Marshall WOBURN III
+</li>
+<li>
+MoerLabs EchoBeatz
+</li>
+<li>
+Sony Link Buds S
+</li>
+<li>
+Sony ULT Wear
+</li>
+<li>
+Sony WF-1000XM3
+</li>
+<li>
+Sony WF-1000XM4
+</li>
+<li>
+Sony WF-1000XM5
+</li>
+<li>
+Sony WF-C500
+</li>
+<li>
+Sony WF-C510-GFP
+</li>
+<li>
+Sony WH-1000XM4
+</li>
+<li>
+Sony WH-1000XM5
+</li>
+<li>
+Sony WH-1000XM6
+</li>
+<li>
+Sony WH-CH520
+</li>
+<li>
+Sony WH-CH720N
+</li>
+<li>
+Sony WH-XB910N
+</li>
+<li>
+Sony WI-C100
+</li>
+<li>
+Teufel Tatws2
+</li>
+</ul>
+<p>Due to the sheer amount of devices that are potentially still affected, there is no proper overview over the current status of fixes</p>
+<p>There a few vendors that mention in firmware updates that the issues are fixed. Other vendors might have silently patched, some might not have patched the vulnerability at all. A positive examples is Jabra, who mentioned the CVEs in <a href="https://www.jabra.com/support/release-notes/release-note-jabra-elite-8-active">firmware release notes</a> as well as their <a href="https://www.jabra.com/supportpages/security-center">security center overview</a>. Which is interesting, because they are less affected than some other vendors due to additional security measures. Moreover, they list all devices that are affected, not just the one device that were initially reported.</p>
+<p>Below is a short list of vendor security updates that are known to us:</p>
+<ul>
+<li><a href="https://www.jabra.com/support/release-notes/release-note-jabra-elite-8-active"><strong>Jabra</strong></a></li>
+<li><a href="https://www.marshall.com/en/en/support/speakers/support-for-acton-iii/latest-firmware-version"><strong>Marshall</strong></a></li>
+<li><strong>Beyerdynamic</strong> (no public link, update supplied via mobile app)</li>
+</ul>
+<p>This large field of unclear information is another motivation for publicly disclosing the technical details. They should empower users to check their own devices. The initial plan was to create and maintain a list of devices. However, acquiring, updating, and testing all these devices would take up time and resources. In the end, it’s the manufacturers’ responsibility to patch and inform their users.</p>
+<h2 id="mitigation">Mitigation</h2>
+<h3 id="users">Users</h3>
+<p>The most important advice for users is obviously to update their devices. However, an update might not be available or the vendor might not have released information about whether the vulnerabilities were addressed in an update.</p>
+<p>If you are a high-value target, such as a journalist, diplomat, politician, or any other person threatened by surveillance we generally recommend using wired headphones instead of Bluetooth headphones.</p>
+<p>Also, check the list of paired devices on your phone. If there are a lot of old, unused ones, remove them. That’s one less Link Key that is potentially stolen.</p>
+<h3 id="manufacturers">Manufacturers</h3>
+<p>Manufacturers should apply the Airoha SDK patches as soon as possible. Ideally, this should have happened as soon as Airoha released the SDK update with the information about the vulnerability.</p>
+<p>Moreover, we recommend manufacturers to do security assessments before they release their products. Following Bluetooth security testing methodology, such as <a href="https://www.tarlogic.com/bsam/">BSAM</a> could have caught these issues.</p>
+<h3 id="the-vulnerabilities-themselves">The Vulnerabilities Themselves</h3>
+<p>Very simplified and summarized, the vulnerabilities can be considered as missing authentication and exposed debug functionality.</p>
+<p><strong>1. CVE-2025-20700: Missing Authentication for GATT (BLE)</strong></p>
+<p>The GATT service should not be available to unpaired devices. GATT offers the functionality to require authentication for characteristics. There are other characteristics and services that are required to be available without pairing (e.g., the Google Fast Pair services), so a service-based authentication for GATT is sensible.</p>
+<p><strong>2. CVE-2025-20701: Missing Authentication for Bluetooth Classic (BR/EDR)</strong></p>
+<p>An unauthenticated Bluetooth Classic connection should never be possible. The device should only accept new connections when it is set in pairing mode.</p>
+<p><strong>3. CVE-2025-20702: Critical Capabilities in Custom Protocol</strong></p>
+<p>The RACE protocol should not expose critical functionality, such as reading and writing RAM or flash.</p>
+<h2 id="disclosure-timeline">Disclosure Timeline</h2>
+<p>Below is the detailed disclosure timeline. We want to emphasize that, once the technical Email related issues were fixed, the communication with Airoha was very positive. Airoha was committed to fix the issues and provide their customers with an updated SDK quickly. We also contacted three manufacturers. Sony and Marshall did not respond to our Emails. Sony only started to respond to our inquiries once they learned that a public partial disclosure and presentation of the vulnerabilities was planned at the Troopers conference. Beyerdynamic, driven by the upcoming EU Cyber Resilience Act (CRA), responded to our Emails which lead to multiple positive exchanges between ERNW and Beyerdynamic.</p>
+<p>Sony offers a bug bounty program via HackerOne. However, it was not possible to submit the issue via the platform. The terms and conditions that are required by the program are not suitable for this vulnerability. ERNW would renounce all rights to the vulnerability. As such, we would not have been allowed to share the vulnerability with Airoha or other manufacturers. Moreover, all rights to disclose details would be taken away from us.</p>
+<table>
+<colgroup>
+<col style="width: 21%">
+<col style="width: 78%">
+</colgroup>
+<thead>
+<tr>
+<th>Date</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>March 25, 2025</td>
+<td>Initial notification and report to security@airoha.com. Start of 90-day disclosure period.</td>
+</tr>
+<tr>
+<td>March 26, 2025</td>
+<td>ERNW provides detailed vulnerability report to Airoha.</td>
+</tr>
+<tr>
+<td>March 31, 2025</td>
+<td>ERNW polls Airoha via another Email.</td>
+</tr>
+<tr>
+<td>April 07, 2025</td>
+<td>ERNW polls Airoha via Email and website contact form.</td>
+</tr>
+<tr>
+<td>April 14, 2025</td>
+<td>ERNW polls Airoha via another Email and announces that it will contact the BSI and some of the vendors by April 17 3pm German time.</td>
+</tr>
+<tr>
+<td>April 24, 2025</td>
+<td>ERNW contacts Sony (security@sony.com), Marshall (soc@marshall.com), Beyerdynamic (info@beyerdynamic.de) via Email (one week later than announced).</td>
+</tr>
+<tr>
+<td>April 24, 2025</td>
+<td>Marshall: Automatic response to confirm reception of Email.</td>
+</tr>
+<tr>
+<td>April 28, 2025</td>
+<td>Beyerdynamic: Compliance Manager responds with request for call.</td>
+</tr>
+<tr>
+<td>April 30, 2025</td>
+<td>Beyerdynamic: Call with short summary of the vulnerabilities and coordination of further process.</td>
+</tr>
+<tr>
+<td>May 05, 2025</td>
+<td>Marshall: ERNW polls. Automatic response received.</td>
+</tr>
+<tr>
+<td>May 07, 2025</td>
+<td>Beyerdynamic: ERNW sends detailed report with vendor-specific PoCs.</td>
+</tr>
+<tr>
+<td>May 08, 2025</td>
+<td>Beyerdynamic: Confirms reception of report and asks for meeting.</td>
+</tr>
+<tr>
+<td>May 09, 2025</td>
+<td>Airoha: ERNW polls Airoha via Email.</td>
+</tr>
+<tr>
+<td>May 09, 2025</td>
+<td>Sony: Polling Sony via various Email addresses with explanation why HackerOne is not possible.</td>
+</tr>
+<tr>
+<td>May 09, 2025</td>
+<td>Sony: Mail to privacyoffice.SEU@sony.com due to potential privacy issues with reference to EU CRA.</td>
+</tr>
+<tr>
+<td>May 12, 2025</td>
+<td>Sony: Private contact to Sony tries to find out what Email we can contact.</td>
+</tr>
+<tr>
+<td>May 13, 2025</td>
+<td>Sony: Email to psirt@sony.com</td>
+</tr>
+<tr>
+<td>May 16, 2025</td>
+<td>Sony: Response from productsec-head@jp.sony.com. Request to accept terms that turned out to be the same ones as HackeOne. ERNW responds that this is not possible due to multi-vendor disclosure and asks on how to proceed.</td>
+</tr>
+<tr>
+<td>May 16, 2025</td>
+<td>Marshall: ERNW polls. Automatic response received.</td>
+</tr>
+<tr>
+<td>May 16, 2025</td>
+<td>Airoha: ERNW polls Airoha via Email.</td>
+</tr>
+<tr>
+<td>May 21, 2025</td>
+<td>Beyerdynamic: Meeting to discuss findings.</td>
+</tr>
+<tr>
+<td>May 27, 2025</td>
+<td>Airoha: First response to ERNW. Communication begins, Airoha is very committed to handling the situation well.</td>
+</tr>
+<tr>
+<td>June 04, 2025</td>
+<td>Airoha: Supplies vendors an SDK update with mitigations.</td>
+</tr>
+<tr>
+<td>June 26, 2025</td>
+<td>Partial Disclosure of the vulnerabilities by ERNW via a <a href="https://insinuator.net/2025/06/airoha-bluetooth-security-vulnerabilities/">blog post</a> and presentation at <a href="https://troopers.de/downloads/troopers25/TR25_Headphone_Jacking_FBNB8Y.pdf">Troopers</a>.</td>
+</tr>
+<tr>
+<td>Dec 27, 2025</td>
+<td>Full Disclosure of the vulnerabilities by ERNW at <a href="https://events.ccc.de/congress/2025/hub/en/event/detail/bluetooth-headphone-jacking-a-key-to-your-phone">39c3</a>.</td>
+</tr>
+</tbody>
+</table>
+<p>Cheers,<br>
+Dennis and Frieder</p>
+<hr>
+<p>If you like to read more about Bluetooth security, you might be interested in the following posts:</p>
+<ul>
+<li><a href="https://insinuator.net/2020/04/cve-2020-0022-an-android-8-0-9-0-bluetooth-zero-click-rce-bluefrag/">CVE-2020-0022 an Android 8.0-9.0 Bluetooth Zero-Click RCE – BlueFrag</a></li>
+<li><a href="https://insinuator.net/2021/10/change-your-ble-passkey-like-you-change-your-underwear/">Change Your BLE Passkey Like You Change Your Underwear</a></li>
+<li><a href="https://insinuator.net/2025/01/auracast-part1/">Part I: Bluetooth Auracast from a Security Researcher’s Perspective</a></li>
+<li><a href="https://insinuator.net/2025/06/using-the-raspberry-pi-pico-w-as-a-bluetooth-dongle/">Using the Raspberry Pi Pico W as a Bluetooth Dongle</a></li>
+</ul>
+<p>If you’re interested in Bluetooth security assessments or IoT and embedded security assessments in general, feel free to <a href="https://ernw.de/en/contact.html">contact us</a>.</p>
+<p>Since a number of people reached out to us: the <a href="https://troopers.de/">registration for TROOPERS26</a> is already active. The CfP and CfT will open very soon; stay tuned and prepare your submissions!</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1">
+<p>Yes, technically GATT can also be used via Classic. And L2CAP is slightly different between Classic and BLE. This diagram is heavily simplified, but for the purpose of this blog post this depiction is fine. I think.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p>
+</li>
+<li id="fn2">
+<p>This is probably the only project where you can run <code>git clone &amp;&amp; make</code>, and it just works. Exactly what we needed here. If you ever need a Bluetooth host stack, we can really recommend BTstack!<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p>
+</li>
+<li id="fn3">
+<p>No GATT exposed. Classic pairing vulnerable, but unreliably.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p>
+</li>
+<li id="fn4">
+<p>No GATT exposed, Classic pairing is enforced, not vulnerable.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p>
+</li>
+</ol>
+</section>
+<style>
+.ppma-category-group.ppma-category-group-1.category-index-0::before {
+  content: "Authors:";
+}
+.pp-multiple-authors-boxes-wrapper {
+  font-style: italic;
+}
+p {text-align: justify}
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+      border-left: 1px solid #808080;
+      border-right: 1px solid #808080;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+    }
+    thead {
+      border-top: 1px solid #808080;
+      background-color: #009A5A;
+      font-weight: bold;
+      color: white;
+    }
+    th {
+      padding: 0.25em 0.5em 0.25em 0.5em;
+      text-align: left;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    tr {
+border-bottom: 1px solid black;
+  background-color: #10101010;
+    }
+    header {
+      text-align: center;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+
+                
+                    <!--begin code -->
+
+                    
+                    <span class="pp-multiple-authors-boxes-wrapper pp-multiple-authors-wrapper pp-multiple-authors-layout-inline multiple-authors-target-the-content box-post-id-15332 box-instance-id-1 ppma_boxes_15332" data-post_id="15332" data-instance_id="1" data-additional_class="pp-multiple-authors-layout-inline.multiple-authors-target-the-content" data-original_class="pp-multiple-authors-boxes-wrapper pp-multiple-authors-wrapper box-post-id-15332 box-instance-id-1">
+                                                <span class="ppma-layout-prefix"></span>
+                        <span class="ppma-author-category-wrap">
+                                                                                                                                    <span class="ppma-category-group ppma-category-group-1 category-index-0">
+                                                                                                                                                                                                                                                                                                                                                                                                
+                                                                                                                    
+                                                            <span class="pp-author-boxes-avatar-details">
+                                                                <span class="pp-author-boxes-name multiple-authors-name"><a href="https://insinuator.net/author/dheinze/" rel="author" title="Dennis Heinze" class="author url fn">Dennis Heinze</a>, </span>                                                                                                                                                                                                
+                                                                                                                                
+                                                                                                                            </span>
+                                                                                                                                                                                                                                                                                                                                                                                                                                            
+                                                                                                                    
+                                                            <span class="pp-author-boxes-avatar-details">
+                                                                <span class="pp-author-boxes-name multiple-authors-name"><a href="https://insinuator.net/author/fsteinmetz/" rel="author" title="Frieder Steinmetz" class="author url fn">Frieder Steinmetz</a></span>                                                                                                                                                                                                
+                                                                                                                                
+                                                                                                                            </span>
+                                                                                                                                                                                                                                                                                                                                                                                            </span>
+                                                                                                                        </span>
+                        <span class="ppma-layout-suffix"></span>
+                                            </span>
+                    <!--end code -->
+                    
+                
+                            
+        
+			</div><!-- .entry-content -->
+
+	<footer class="entry-footer">
+					<div class="back-and-social">
+									<nav class="back-to-home">
+  <a class="back-to-home-link" href="https://insinuator.net/#post-15654">
+    <svg class="icon icon--back">
+      <use xlink:href="#back"></use>
+    </svg>
+    <span class="screen-reader-text">Back</span>
+  </a>
+</nav>
+				
+				<aside class="entry-social-share">
+									</aside>
+			</div>
+		
+			</footer><!-- .entry-footer -->
+</article><!-- #post-## -->
+
+	<nav class="navigation post-navigation" aria-label="Posts">
+		<h2 class="screen-reader-text">Post navigation</h2>
+		<div class="nav-links"><div class="nav-previous"><a href="https://insinuator.net/2025/10/mcttp-2025-keynote/" rel="prev">MCTTP 2025 / Keynote</a></div><div class="nav-next"><a href="https://insinuator.net/2026/01/incident-response-in-gcp-out-of-scope-ouf-of-mind/" rel="next">Incident Response in GCP: Out of Scope – Out of Mind</a></div></div>
+	</nav>
+<div id="comments" class="comments-area has-comments">
+
+			<h3 class="comments-title">Comments</h3>
+
+		
+		<ol class="comment-list">
+					<li id="comment-178272" class="comment even thread-even depth-1">
+			<article id="div-comment-178272" class="comment-body">
+				<footer class="comment-meta">
+					<div class="comment-author vcard">
+												<b class="fn">DR TIMOTHY S FRENCH</b> <span class="says">says:</span>					</div><!-- .comment-author -->
+
+					<div class="comment-metadata">
+						<a href="https://insinuator.net/2025/12/bluetooth-headphone-jacking-full-disclosure-of-airoha-race-vulnerabilities/#comment-178272"><time datetime="2026-01-05T17:52:50+01:00">January 5, 2026 at 5:52 pm</time></a>					</div><!-- .comment-metadata -->
+
+									</footer><!-- .comment-meta -->
+
+				<div class="comment-content">
+					<p>Several years ago whilst working for a global OEM we looked at Bluetooth tethering to our “Infotainment” system, amongst other vulnerabilities. The inherent hackability is no surpise herein but the central message viz “silent” pairing capabilities is well worth [re-]emphasising. Bluetooth thethering could [in theory] enable access to e.g. braking sytems via the Infotainment centres though (at that time ..) not exploited “in the wild” outside proof fo concept / academic hacking. This is similar to your example of mobile phone comprise via ear buds.. Great article &amp; really detailed too!</p>
+				</div><!-- .comment-content -->
+
+				<div class="reply"><a rel="nofollow" class="comment-reply-link" href="https://insinuator.net/2025/12/bluetooth-headphone-jacking-full-disclosure-of-airoha-race-vulnerabilities/?replytocom=178272#respond" data-commentid="178272" data-postid="15654" data-belowelement="div-comment-178272" data-respondelement="respond" data-replyto="Reply to DR TIMOTHY S FRENCH" aria-label="Reply to DR TIMOTHY S FRENCH">Reply</a></div>			</article><!-- .comment-body -->
+		</li><!-- #comment-## -->
+		</ol><!-- .comment-list -->
+
+			<div id="respond" class="comment-respond">
+		<h3 id="reply-title" class="comment-reply-title">Leave a Reply <small><a rel="nofollow" id="cancel-comment-reply-link" href="/2025/12/bluetooth-headphone-jacking-full-disclosure-of-airoha-race-vulnerabilities/#respond" style="display:none;">Cancel reply</a></small></h3><form action="https://insinuator.net/wp-comments-post.php" method="post" id="commentform" class="comment-form"><p class="comment-notes"><span id="email-notes">Your email address will not be published.</span> <span class="required-field-message">Required fields are marked <span class="required">*</span></span></p><p class="comment-form-comment"><label for="comment">Comment <span class="required">*</span></label> <textarea id="comment" name="comment" cols="45" rows="8" maxlength="65525" required=""></textarea></p><p class="comment-form-author"><label for="author">Name <span class="required">*</span></label> <input id="author" name="author" type="text" value="" size="30" maxlength="245" autocomplete="name" required=""></p>
+<p class="comment-form-email"><label for="email">Email <span class="required">*</span></label> <input id="email" name="email" type="email" value="" size="30" maxlength="100" aria-describedby="email-notes" autocomplete="email" required=""></p>
+<p class="comment-form-url"><label for="url">Website</label> <input id="url" name="url" type="url" value="" size="30" maxlength="200" autocomplete="url"></p>
+<p class="form-submit"><input name="submit" type="submit" id="submit" class="submit" value="Post Comment"> <input type="hidden" name="comment_post_ID" value="15654" id="comment_post_ID">
+<input type="hidden" name="comment_parent" id="comment_parent" value="0">
+</p><p style="display: none;"><input type="hidden" id="akismet_comment_nonce" name="akismet_comment_nonce" value="3c56b7b67c"></p><p style="display: none !important;" class="akismet-fields-container" data-prefix="ak_"><label>Δ<textarea name="ak_hp_textarea" cols="45" rows="8" maxlength="100"></textarea></label><input type="hidden" id="ak_js_1" name="ak_js" value="1774847697269"><script>document.getElementById( "ak_js_1" ).setAttribute( "value", ( new Date() ).getTime() );</script></p></form>	</div><!-- #respond -->
+	
+</div><!-- #comments -->
+
+		</main><!-- #main -->
+	</div><!-- #primary -->
+
+
+		</div><!-- #content -->
+
+		<footer id="colophon" class="site-footer" role="contentinfo">
+			<div class="site-info">
+				<p>
+					<a href="/about" alt="Imprint">Imprint</a> | <a href="/privacy" alt="Privacy Policy">Privacy Policy</a> | ©2026 ERNW Enno Rey Netzwerke GmbH
+				</p>
+				<nav class="contact-us-icons">
+					<ul class="inline">
+						<li>
+							<a href="mailto:info@insinuator.net" alt="Mail to us">
+								<svg class="icon icon--mail">
+					        <use xlink:href="#mail"></use>
+					      </svg>
+							</a>
+						</li>
+						<li>
+							<a href="https://infosec.exchange/@Insinuator" target="_blank" alt="Check our mastodon feed">
+								<svg class="icon icon--mastodon">
+					        <use xlink:href="#mastodon"></use>
+					      </svg>
+							</a>
+						</li>
+                        <li>
+							<a href="https://de.linkedin.com/company/ernw-gmbh" target="_blank" alt="Check our linkedin page">
+								<svg class="icon icon--linkedin">
+					        <use xlink:href="#linkedin"></use>
+					      </svg>
+							</a>
+						</li>
+					</ul>
+				</nav>
+			</div><!-- .site-info -->
+		</footer><!-- #colophon -->
+	</div><!-- #page -->
+
+	<script type="speculationrules">
+{"prefetch":[{"source":"document","where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":["/wp-*.php","/wp-admin/*","/wp-content/uploads/*","/wp-content/*","/wp-content/plugins/*","/wp-content/themes/insinuator2/*","/*\\?(.+)"]}},{"not":{"selector_matches":"a[rel~=\"nofollow\"]"}},{"not":{"selector_matches":".no-prefetch, .no-prefetch a"}}]},"eagerness":"conservative"}]}
+</script>
+<style id="mutliple-author-box-inline-style">.pp-multiple-authors-boxes-wrapper.pp-multiple-authors-layout-inline.multiple-authors-target-the-content .pp-author-boxes-avatar img { 
+        width: 80px !important; 
+        height: 80px !important; 
+    }
+
+    .pp-multiple-authors-boxes-wrapper.pp-multiple-authors-layout-inline.multiple-authors-target-the-content .pp-author-boxes-avatar img {
+        border-radius: 50% !important; 
+    }
+
+    .pp-multiple-authors-boxes-wrapper.pp-multiple-authors-layout-inline.multiple-authors-target-the-content .pp-author-boxes-meta a {
+        background-color: #655997 !important; 
+    }
+
+    .pp-multiple-authors-boxes-wrapper.pp-multiple-authors-layout-inline.multiple-authors-target-the-content .pp-author-boxes-meta a {
+        color: #ffffff !important; 
+    }
+
+    .pp-multiple-authors-boxes-wrapper.pp-multiple-authors-layout-inline.multiple-authors-target-the-content .pp-author-boxes-meta a:hover {
+        color: #ffffff !important; 
+    }
+
+    .pp-multiple-authors-boxes-wrapper.pp-multiple-authors-layout-inline.multiple-authors-target-the-content .ppma-author-user_email-profile-data {
+        background-color: #655997 !important; 
+    }
+
+    .pp-multiple-authors-boxes-wrapper.pp-multiple-authors-layout-inline.multiple-authors-target-the-content .ppma-author-user_email-profile-data {
+        border-radius: 100% !important; 
+    }
+
+    .pp-multiple-authors-boxes-wrapper.pp-multiple-authors-layout-inline.multiple-authors-target-the-content .ppma-author-user_email-profile-data {
+        color: #ffffff !important; 
+    }
+
+    .pp-multiple-authors-boxes-wrapper.pp-multiple-authors-layout-inline.multiple-authors-target-the-content .ppma-author-user_email-profile-data:hover {
+        color: #ffffff !important; 
+    }
+
+    .pp-multiple-authors-boxes-wrapper.pp-multiple-authors-layout-inline.multiple-authors-target-the-content .ppma-author-user_url-profile-data {
+        background-color: #655997 !important; 
+    }
+
+    .pp-multiple-authors-boxes-wrapper.pp-multiple-authors-layout-inline.multiple-authors-target-the-content .ppma-author-user_url-profile-data {
+        border-radius: 100% !important; 
+    }
+
+    .pp-multiple-authors-boxes-wrapper.pp-multiple-authors-layout-inline.multiple-authors-target-the-content .ppma-author-user_url-profile-data {
+        color: #ffffff !important; 
+    }
+
+    .pp-multiple-authors-boxes-wrapper.pp-multiple-authors-layout-inline.multiple-authors-target-the-content .ppma-author-user_url-profile-data:hover {
+        color: #ffffff !important; 
+    }
+
+    .pp-multiple-authors-boxes-wrapper.pp-multiple-authors-layout-inline.multiple-authors-target-the-content .pp-author-boxes-recent-posts-title {
+        border-bottom-style: dotted !important; 
+    }
+
+    .pp-multiple-authors-boxes-wrapper.pp-multiple-authors-layout-inline.multiple-authors-target-the-content .pp-author-boxes-recent-posts-item {
+        text-align: left !important; 
+    }
+
+    .pp-multiple-authors-boxes-wrapper.pp-multiple-authors-layout-inline.multiple-authors-target-the-content .pp-multiple-authors-boxes-li {
+        border-style: none !important; 
+    }
+
+    .pp-multiple-authors-boxes-wrapper.pp-multiple-authors-layout-inline.multiple-authors-target-the-content .pp-multiple-authors-boxes-li {
+        color: #3c434a !important; 
+    }
+
+.pp-multiple-authors-layout-inline ul.pp-multiple-authors-boxes-ul {
+            display: flex;
+        }
+
+        .pp-multiple-authors-layout-inline ul.pp-multiple-authors-boxes-ul li {
+            margin-right: 10px
+        }.pp-multiple-authors-boxes-wrapper.pp-multiple-authors-wrapper.pp-multiple-authors-layout-inline.multiple-authors-target-the-content.box-post-id-15332.box-instance-id-1.ppma_boxes_15332 ul li > div:nth-child(1) {flex: 1 !important;}.pp-multiple-authors-boxes-wrapper.pp-multiple-authors-wrapper.pp-multiple-authors-layout-inline.multiple-authors-target-the-content.box-post-id-15332.box-instance-id-1.ppma_boxes_15332 ul li > div:nth-child(1) {flex: 1 !important;}</style><script type="text/javascript" src="https://insinuator.net/wp-content/themes/insinuator2/js/lib/jquery.waypoints.min.js?ver=20160621" id="insinuator-2-jquery-waypoints-js"></script>
+<script type="text/javascript" src="https://insinuator.net/wp-content/themes/insinuator2/js/navigation.js?ver=20151215" id="insinuator-2-navigation-js"></script>
+<script type="text/javascript" src="https://insinuator.net/wp-content/themes/insinuator2/js/skip-link-focus-fix.js?ver=20151215" id="insinuator-2-skip-link-focus-fix-js"></script>
+<script type="text/javascript" src="https://insinuator.net/wp-content/themes/insinuator2/js/insinuator2.js?ver=20160621" id="insinuator-2-general-js"></script>
+<script type="text/javascript" src="https://insinuator.net/wp-includes/js/comment-reply.min.js?ver=6.9.4" id="comment-reply-js" async="async" data-wp-strategy="async" fetchpriority="low"></script>
+<script defer="" type="text/javascript" src="https://insinuator.net/wp-content/plugins/akismet/_inc/akismet-frontend.js?ver=1762966073" id="akismet-frontend-js"></script>
+<script id="wp-emoji-settings" type="application/json">
+{"baseUrl":"https://s.w.org/images/core/emoji/17.0.2/72x72/","ext":".png","svgUrl":"https://s.w.org/images/core/emoji/17.0.2/svg/","svgExt":".svg","source":{"concatemoji":"https://insinuator.net/wp-includes/js/wp-emoji-release.min.js?ver=6.9.4"}}
+</script>
+<script type="module">
+/* <![CDATA[ */
+/*! This file is auto-generated */
+const a=JSON.parse(document.getElementById("wp-emoji-settings").textContent),o=(window._wpemojiSettings=a,"wpEmojiSettingsSupports"),s=["flag","emoji"];function i(e){try{var t={supportTests:e,timestamp:(new Date).valueOf()};sessionStorage.setItem(o,JSON.stringify(t))}catch(e){}}function c(e,t,n){e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(t,0,0);t=new Uint32Array(e.getImageData(0,0,e.canvas.width,e.canvas.height).data);e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(n,0,0);const a=new Uint32Array(e.getImageData(0,0,e.canvas.width,e.canvas.height).data);return t.every((e,t)=>e===a[t])}function p(e,t){e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(t,0,0);var n=e.getImageData(16,16,1,1);for(let e=0;e<n.data.length;e++)if(0!==n.data[e])return!1;return!0}function u(e,t,n,a){switch(t){case"flag":return n(e,"\ud83c\udff3\ufe0f\u200d\u26a7\ufe0f","\ud83c\udff3\ufe0f\u200b\u26a7\ufe0f")?!1:!n(e,"\ud83c\udde8\ud83c\uddf6","\ud83c\udde8\u200b\ud83c\uddf6")&&!n(e,"\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f","\ud83c\udff4\u200b\udb40\udc67\u200b\udb40\udc62\u200b\udb40\udc65\u200b\udb40\udc6e\u200b\udb40\udc67\u200b\udb40\udc7f");case"emoji":return!a(e,"\ud83e\u1fac8")}return!1}function f(e,t,n,a){let r;const o=(r="undefined"!=typeof WorkerGlobalScope&&self instanceof WorkerGlobalScope?new OffscreenCanvas(300,150):document.createElement("canvas")).getContext("2d",{willReadFrequently:!0}),s=(o.textBaseline="top",o.font="600 32px Arial",{});return e.forEach(e=>{s[e]=t(o,e,n,a)}),s}function r(e){var t=document.createElement("script");t.src=e,t.defer=!0,document.head.appendChild(t)}a.supports={everything:!0,everythingExceptFlag:!0},new Promise(t=>{let n=function(){try{var e=JSON.parse(sessionStorage.getItem(o));if("object"==typeof e&&"number"==typeof e.timestamp&&(new Date).valueOf()<e.timestamp+604800&&"object"==typeof e.supportTests)return e.supportTests}catch(e){}return null}();if(!n){if("undefined"!=typeof Worker&&"undefined"!=typeof OffscreenCanvas&&"undefined"!=typeof URL&&URL.createObjectURL&&"undefined"!=typeof Blob)try{var e="postMessage("+f.toString()+"("+[JSON.stringify(s),u.toString(),c.toString(),p.toString()].join(",")+"));",a=new Blob([e],{type:"text/javascript"});const r=new Worker(URL.createObjectURL(a),{name:"wpTestEmojiSupports"});return void(r.onmessage=e=>{i(n=e.data),r.terminate(),t(n)})}catch(e){}i(n=f(s,u,c,p))}t(n)}).then(e=>{for(const n in e)a.supports[n]=e[n],a.supports.everything=a.supports.everything&&a.supports[n],"flag"!==n&&(a.supports.everythingExceptFlag=a.supports.everythingExceptFlag&&a.supports[n]);var t;a.supports.everythingExceptFlag=a.supports.everythingExceptFlag&&!a.supports.flag,a.supports.everything||((t=a.source||{}).concatemoji?r(t.concatemoji):t.wpemoji&&t.twemoji&&(r(t.twemoji),r(t.wpemoji)))});
+//# sourceURL=https://insinuator.net/wp-includes/js/wp-emoji-loader.min.js
+/* ]]> */
+</script>
+
+
+
+</body></html>

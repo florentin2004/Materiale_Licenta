@@ -1,0 +1,14 @@
+# 1. Inițializează emularea și mașina virtuală
+mach create "nrf52840-vulnerable"
+
+# 2. Încarcă descrierea hardware predefinită a cipului de la Nordic
+machine LoadPlatformDescription @platforms/cpus/nrf52840.repl
+
+# 3. LINIA CORECTATĂ: Încarcă binarul pre-compilat din folderele locale ale Renode
+sysbus LoadELF @samples/nrf52840/zephyr-shell_module.elf
+
+# 4. Deschide log-urile și o consolă UART virtuală
+showAnalyzer uart0
+
+# 5. Setează nivelul de log pentru a vedea pachetele radio
+logLevel -1 sysbus.radio

@@ -1,0 +1,12 @@
+LINK: https://github.com/trapedev/stealtooth
+nu pare sa fie poc, va trebui sa vad de unde fac rost de proof of concept
+este evidentiat faptul ca securitatea arhitecturii la Bluetooth se bazeaza exclusiv la procesul de pairing, insa din anumite motive de eficientizare se sare peste acesta facand automatic pairing functions
+prezinta atacuri precum BIAS si Blacktooth
+se face o impersonare. se poate oare deconecta device-ul ? sa ii trimitic un semnal de shut down pentru a continua impersonarea
+si cum stie el ce se trimite (aici am intrebari la protocoalele respective cum functioneaza). ce ma opreste sa-i fi trimis inainte audio si dupa sa vreau eu sa-i trimit un backdoor sau un fisier malitios ? (este protejat pentru astfel de cazuri ? sunt constient ca este periculos abia cand se executa, nu cand se instaleaza)
+problema vine de la dorinta de a face lucrurile sa decurga mai rapid. (automatic pairing mode)
+breaktooth din cate citesc se foloseste de 2 vulnerabilitati, insa tot la nivel de KNOB se foloseste. la pasul 3 se cere "low security-level authentification functions"
+are cateva limitari cand vine vorba de ce poate sa faca
+
+
+Totuși, dacă atacatorul impersonează căștile față de laptop/telefon (Master), el poate deschide canalul HID (Human Interface Device — tastatură/mouse) și poate injecta tastări rapide de taste (Keystroke Injection / Rubber Ducky) pentru a deschide un terminal și a rula comenzi malițioase

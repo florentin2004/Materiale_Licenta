@@ -1,0 +1,42 @@
+LINK: https://github.com/sgxgsx/BlueToolkit
+M-am apucat de citit din woot25-zubkov.pdf
+Am inteles ca se axeaza pe Bluetooth BR/EDR de la vehicule de circulatie (masini, motociclete, ...). Nu inteleg ce este black-box recon. Am inteles partea de inceput unde spune vulnerabilitatile folosite si device-urile testate.
+au setat requirments (black-box, high coverage, extensible, usable)
+Foarte important de retinut este ca am nevoie de adresa de Bluetooth a targetului pentru a putea implementa atacul
+Se foloseste de alte tooluri pentru testare Bluetooth ? in Listing 1 observ ca foloseste braktooth ... spune KNOB attack from BrakTooth fuzzer repository. 
+Care este diferenta dintre un dongle si un microcontroler ? in document se folosesc ESP32 si Nexus 5 (fiecare pentru vulnerabilitatea pe care o foloseste) si Linux default. eu voiam sa folosesc in proiectul meu NRF52840-DONGLE (observasem ca cei de la Nordic semiconductor au o vulnerabilitate - CVE-2025-9709: Improper Access Control în nRF52810)
+am ajuns la pagina 7/19 capitolul 5.2 si acolo m-am oprit momentan. mai am de citit, sunt curios de raspunsurile pe care o sa le primesc
+--- Aici a fost o pauza
+testele sunt atat generice cat si automotive-specific - testeaza daca suporta SC, BLE sau SPP
+Ce este IVI la masinile care suporta Bluetooth ? -> In-Vehicle Infoinment (ce face ?)
+Ei au inceput prin a face o biblioteca cu toate vulnerabilitatile din ultimii 10 ani si dupa le-au restrans la cele care aveau PoC publicat
+Observ ca la la hardware este default, esp32 (microprocesor), nexus5 (microprocesor), nrf52(dongle cred)
+la masini testate este o lista destul de lunga, dar nu stiu momentan ce imi ofera exploatarea vulnerabilitatilor.
+D1 Method Confusion
+D2 NiNo
+D3 Invalid Curve Attack
+D4 KNOB
+D5 LegacyPairing
+MitM
+MitM
+MitM
+MitM
+MitM
+D6 PBAP Extraction (new) IL
+
+acestea ar fi, dar nu stiu ce ar face. in mare parte este MitM
+
+am observat in tabelul 4 ca mentioneaza ce se poate face. RCE, AB si DoS
+
+Ei au facut un sistem de detective vulnerabilitati BR/EDR si BLE la masini. Tema mea este asemanatoare cu a lor. diferenta ar fi ca eu incerc sa fac la tot ce este IoT
+6.1 PBAPExtraction -> destul de interesant. se foloseste pentru a exfiltra numerele de telefon salvate
+--- Aici a fost o pauza
+se pare ca la JW Central Downgrade se poate face o conectare fara autentificare daca atacatorul se da drep un periferic
+cum fac o simulare ? nu cred ca o sa incerc pe o masina ci pe hardware folosit in ea ...
+--- Aici a fost o pauza
+daca devizatia dintre noua versiune de Bluetooth si implementarea ei in masini este de 7.14 ani, se poate spune ca ar fi la fel si la casti. acest articol mi se pare destul de asemanator cu WhisperPair
+Gata
+----------- GEMINI
+6. Cum faci o simulare fără o mașină reală?Nu este nevoie de o mașină fizică. Un sistem de IVI este, la bază, un sistem embedded (adesea rulând Android Automotive sau Linux Yocto/Automotive Grade Linux) conectat la un cip Bluetooth.   Varianta Hardware: Poți folosi un microcontroller Nordic (ex. seria nRF52/nRF53) pe care rulezi stiva Zephyr RTOS, configurat ca periferic sau central.Varianta Simulare Software (Renode): Simulatorul Renode permite emularea la nivel de instrucțiuni a plăcilor cu arhitectură ARM (precum nRF52840) rulând Zephyr RTOS. Poți rula în Renode o mașină virtuală/dispozitiv emulat și să testezi interacțiunea la nivel de stivă HCI/LMP.
+
+
