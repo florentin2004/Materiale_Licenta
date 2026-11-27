@@ -8,7 +8,6 @@ public class ScanOptions
     public bool ActiveScan { get; private set; }
     public bool Connect { get; private set; }
     public string? ConnectFilter { get; private set; }
-    public string? TargetFilter { get; private set; }
     public bool NoPrompt { get; private set; }
     public bool Fast { get; private set; }
     public bool Debug { get; private set; }
@@ -16,12 +15,6 @@ public class ScanOptions
     public TimeSpan DeviceTimeout { get; private set; } = TimeSpan.FromSeconds(8);
     public TimeSpan EnumTimeout { get; private set; } = TimeSpan.FromSeconds(15);
     public string BaseDirectory { get; } = AppContext.BaseDirectory;
-
-    /// <summary>Filtrul efectiv: --target are prioritate fata de --connect=filtru.</summary>
-    public string? EffectiveFilter =>
-        !string.IsNullOrWhiteSpace(TargetFilter) ? TargetFilter : ConnectFilter;
-
-    public bool HasFilter => !string.IsNullOrWhiteSpace(EffectiveFilter);
 
     public static ScanOptions Parse(string[] args)
     {
@@ -47,12 +40,6 @@ public class ScanOptions
                 if (!string.IsNullOrEmpty(value))
                     o.ConnectFilter = value;
             }
-            else if (lower.StartsWith("--target="))
-            {
-                o.TargetFilter = a[9..].Trim();
-                // --target filtrează și declanșează triajul (conform mesajului de ajutor).
-                o.Connect = true;
-            }
             else if (lower == "--no-prompt") o.NoPrompt = true;
             else if (lower == "--fast") o.Fast = true;
             else if (lower == "--debug") o.Debug = true;
@@ -67,7 +54,7 @@ public class ScanOptions
     /// <summary>True daca nu exista filtru sau daca MAC-ul / numele se potrivesc cu filtrul.</summary>
     public bool MatchesFilter(string? macAddress, string? name)
     {
-        string? filter = EffectiveFilter;
+        string? filter = ConnectFilter;
         if (string.IsNullOrWhiteSpace(filter))
             return true;
 
@@ -107,7 +94,6 @@ public class ScanOptions
           --help, -h               Afiseaza acest mesaj de ajutor si iese.
           --scan=<secunde>         Durata scanarii pasive BLE (implicit: 8 secunde).
           --no-scan                Sare peste scanarea BLE (analizeaza doar istoricul din devices_db.json).
-          --target=<MAC|Nume>      Filtreaza si analizeaza doar o tinta anume (dupa MAC sau nume).
           --connect[=<filtru>]     Ruleaza triajul pasiv (ReconEngine) si salveaza candidații in recon_targets.json.
           --active-scan            Ruleaza sondarea activa GATT (enumera serviciile, citeste 0x180A si testeaza 0xFE2C) pe tintele conectabile.
           --debug                  Afiseaza detalii suplimentare in timpul scanarii si filtrarii.
@@ -121,7 +107,6 @@ public class ScanOptions
           dotnet run -- --no-scan --connect=2CE2AD64
           dotnet run -- --scan=6 --connect=2CE2AD64 --active-scan
           dotnet run -- --no-scan --connect=D1D32CE2AD64 --active-scan
-          dotnet run -- --no-scan --target=D1D32CE2AD64 --active-scan
         """);
     }
 }

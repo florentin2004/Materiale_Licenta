@@ -18,7 +18,7 @@
    - Extrage MAC, nume, RSSI, `CompanyIds`, `ServiceUuids` și, pentru pachetele *Service Data — 16-bit UUID* (`DataType == 0x16`) cu UUID `0xFE2C` (Google Fast Pair) de cel puțin 5 octeți, extrage **Model ID-ul pe 3 octeți (little-endian)** sub forma `FastPair_ModelID:0xXXXXXX`. Actualizează `devices_db.json`.
 
 4. **Triaj pasiv (`ReconEngine`) & export candidați (`recon_targets.json`)**
-   - Evaluează dispozitivele selectate (toate din sesiune/istoric sau cele filtrate prin `--connect=<filtru>` / `--target=...`) față de regulile din `vulnerabilities.json`.
+   - Evaluează dispozitivele selectate (toate din sesiune/istoric sau cele filtrate prin `--connect=<filtru>`) față de regulile din `vulnerabilities.json`.
    - Recunoaște semnalul specific `FastPair_ModelID:` ca semnal puternic (`strongSignal = true`) și îl include în raport. Încrederea devine `Probabil` doar când există și un semnal slab corelat (`strongSignal && weakSignal`, ex. Company ID / vendor) sau firmware confirmat; altfel rămâne la nivelul `Candidat` din catalog. Afișează raportul în consolă și salvează candidații în `recon_targets.json`.
 
 5. **Scanare activă / Sondare GATT (`--active-scan`) — integrată**
@@ -32,7 +32,7 @@
 ## 2. Arhitectura aplicației — Ce face fiecare clasă
 
 ### Orchestrare și nivel de intrare
-* **`Program`** (`Program.cs`): Punctul de intrare al aplicației (`Main`). Parsează argumentele din linia de comandă (`--scan`, `--scan=N`, `--no-scan`, `--active-scan`, `--connect=<filtru>`, `--target=`), încarcă în paralel fișierele de referință și coordonează ordinea etapelor: verificare dispozitive conectate $\rightarrow$ scanare pasivă $\rightarrow$ filtrare $\rightarrow$ triaj `ReconEngine` $\rightarrow$ sondare activă opțională (`ActiveGattProber`, prin `--active-scan`) $\rightarrow$ salvare rezultate.
+* **`Program`** (`Program.cs`): Punctul de intrare al aplicației (`Main`). Parsează argumentele din linia de comandă (`--scan`, `--scan=N`, `--no-scan`, `--active-scan`, `--connect=<filtru>`), încarcă în paralel fișierele de referință și coordonează ordinea etapelor: verificare dispozitive conectate $\rightarrow$ scanare pasivă $\rightarrow$ filtrare $\rightarrow$ triaj `ReconEngine` $\rightarrow$ sondare activă opțională (`ActiveGattProber`, prin `--active-scan`) $\rightarrow$ salvare rezultate.
 * **`ConnectedDeviceChecker`**: Verifică ce dispozitive Bluetooth (Classic / BR/EDR și BLE) sunt deja conectate la laptop în momentul pornirii aplicației. Folosește selectoare separate pentru dispozitive împerecheate, citește `System.Devices.Aep.IsConnected`, elimină duplicatele Dual-Mode după același `DeviceId` și elimină prefixul `LE-` din numele afișat (`ConnectedDeviceInfo(Name, Id, Transport)`).
 
 ### Achiziție de date și persistență
@@ -72,7 +72,7 @@ Lectura/alpha01/
 ├─ company_identifiers.yaml          # registry Bluetooth SIG (~4071 companii)
 ├─ master_oui.txt                    # prefixe OUI IEEE/Wireshark
 ├─ Models/
-│  ├─ ScanOptions.cs                 # parsare --help/--scan/--no-scan/--target/--connect/--active-scan
+│  ├─ ScanOptions.cs                 # parsare --help/--scan/--no-scan/--connect/--active-scan
 │  ├─ BluetoothDeviceRecord.cs       # entitatea persistată + enum BluetoothTransport
 │  └─ ConnectedDeviceChecker.cs      # inventar dispozitive conectate (Classic vs BLE)
 ├─ PassiveDetection/
@@ -174,7 +174,7 @@ Această secțiune descrie **comportamentul așteptat**, nu un output real. Outp
 * **Dual-Mode:** același dispozitiv fizic nu trebuie duplicat. Windows poate raporta numele `LE-Philips TAT3509`; `CleanDeviceName` elimină prefixul, iar dedupul după `DeviceId` împiedică apariția a două intrări pentru aceeași legătură.
 * **Fast Pair:** în `ServiceUuids` trebuie să apară `0000fe2c-0000-1000-8000-00805f9b34fb` și un `FastPair_ModelID:0xXXXXXX` (cei 3 octeți little-endian din `0x16`). `ReconEngine` marchează semnalul ca puternic, dar levelul rămâne `Candidat` dacă nu există și un semnal slab corelat; `Probabil` cere `strongSignal && weakSignal` sau firmware confirmat. Valoarea Model ID poate diferi între sesiuni/adrese (`0x1D4000` anterior, `0x804000` în testul de mai jos) — de verificat. Valoarea exactă nu trebuie considerată identitate fixă a dispozitivului.
 
-### La rularea `dotnet run -- --no-scan --target=2CE2AD64 --active-scan`
+### La rularea `dotnet run -- --no-scan --connect=2CE2AD64 --active-scan`
 
 1. `[CONECTAT] Nu exista niciun dispozitiv Bluetooth conectat la laptop in acest moment.` — consecința directă a deconectării căștilor.
 2. Triajul pasiv poate încă raporta candidați `WhisperPair` din istoric (`Service UUID` / `FastPair_ModelID`), dar candidatul `WEAK-PAIRING-OR-OPEN-GATT` trebuie să dispară **după** ce o sondare activă a scris `GattAccess = Unreachable` în `devices_db.json`. Înainte de acea actualizare, valoarea veche `Success` poate rămâne în istoric — aceasta este limita ordinii curente `ReconEngine` → sondare activă.
@@ -1616,7 +1616,6 @@ public class ScanOptions
     public bool ActiveScan { get; private set; }
     public bool Connect { get; private set; }
     public string? ConnectFilter { get; private set; }
-    public string? TargetFilter { get; private set; }
     public bool NoPrompt { get; private set; }
     public bool Fast { get; private set; }
     public bool Debug { get; private set; }
@@ -1624,12 +1623,6 @@ public class ScanOptions
     public TimeSpan DeviceTimeout { get; private set; } = TimeSpan.FromSeconds(8);
     public TimeSpan EnumTimeout { get; private set; } = TimeSpan.FromSeconds(15);
     public string BaseDirectory { get; } = AppContext.BaseDirectory;
-
-    /// <summary>Filtrul efectiv: --target are prioritate fata de --connect=filtru.</summary>
-    public string? EffectiveFilter =>
-        !string.IsNullOrWhiteSpace(TargetFilter) ? TargetFilter : ConnectFilter;
-
-    public bool HasFilter => !string.IsNullOrWhiteSpace(EffectiveFilter);
 
     public static ScanOptions Parse(string[] args)
     {
@@ -1655,12 +1648,6 @@ public class ScanOptions
                 if (!string.IsNullOrEmpty(value))
                     o.ConnectFilter = value;
             }
-            else if (lower.StartsWith("--target="))
-            {
-                o.TargetFilter = a[9..].Trim();
-                // --target filtrează și declanșează triajul (conform mesajului de ajutor).
-                o.Connect = true;
-            }
             else if (lower == "--no-prompt") o.NoPrompt = true;
             else if (lower == "--fast") o.Fast = true;
             else if (lower == "--debug") o.Debug = true;
@@ -1675,7 +1662,7 @@ public class ScanOptions
     /// <summary>True daca nu exista filtru sau daca MAC-ul / numele se potrivesc cu filtrul.</summary>
     public bool MatchesFilter(string? macAddress, string? name)
     {
-        string? filter = EffectiveFilter;
+        string? filter = ConnectFilter;
         if (string.IsNullOrWhiteSpace(filter))
             return true;
 
@@ -1715,7 +1702,6 @@ public class ScanOptions
           --help, -h               Afiseaza acest mesaj de ajutor si iese.
           --scan=<secunde>         Durata scanarii pasive BLE (implicit: 8 secunde).
           --no-scan                Sare peste scanarea BLE (analizeaza doar istoricul din devices_db.json).
-          --target=<MAC|Nume>      Filtreaza si analizeaza doar o tinta anume (dupa MAC sau nume).
           --connect[=<filtru>]     Ruleaza triajul pasiv (ReconEngine) si salveaza candidații in recon_targets.json.
           --active-scan            Ruleaza sondarea activa GATT (enumera serviciile, citeste 0x180A si testeaza 0xFE2C) pe tintele conectabile.
           --debug                  Afiseaza detalii suplimentare in timpul scanarii si filtrarii.
@@ -1729,7 +1715,6 @@ public class ScanOptions
           dotnet run -- --no-scan --connect=2CE2AD64
           dotnet run -- --scan=6 --connect=2CE2AD64 --active-scan
           dotnet run -- --no-scan --connect=D1D32CE2AD64 --active-scan
-          dotnet run -- --no-scan --target=D1D32CE2AD64 --active-scan
         """);
     }
 }
@@ -1983,7 +1968,7 @@ public class Program
         var passiveDetection = new PassiveDetectionService(lookupStore, historyStore);
         var detectedDevices = await passiveDetection.ExecuteAsync(opts);
 
-        // Filtrare optionala pe o tinta anume (--target=... sau --connect=... / --connection=...)
+        // Filtrare optionala pe o tinta anume (--connect=<filtru>)
         var filteredDevices = detectedDevices
             .Where(d => opts.MatchesFilter(d.MacAddress, d.Name))
             .ToList();
@@ -1991,7 +1976,7 @@ public class Program
         string scope = opts.ScanSeconds > 0 ? "in sesiune" : "din istoric (--no-scan)";
         Console.WriteLine($"[REZULTAT] Dispozitive {scope}: {detectedDevices.Count} (afisate/analizate: {filteredDevices.Count})");
 
-        // 3. Triaj pasiv (ReconEngine) cand se cere --connect sau --target
+        // 3. Triaj pasiv (ReconEngine) doar cand se cere --connect
         if (opts.Connect)
         {
             var reconEngine = ReconEngine.LoadFromFile(Path.Combine(baseDir, "vulnerabilities.json"));
@@ -2046,6 +2031,8 @@ if (opts.ActiveScan)
 ```
 
 ## Testare aplicatie (OUTPUT)
+
+> Transcript istoric: a fost obținut când CLI-ul avea încă `--target`. Opțiunea a fost eliminată; echivalentul curent este `--connect=DD152CE2AD64`. Prefixul `[TARGET]` din raport este doar eticheta de afișare a candidatului, nu un flag CLI.
 
 ```text
 D:\GoCrazy\Licenta\Lectura\alpha01>dotnet build
@@ -2208,7 +2195,8 @@ D:\GoCrazy\Licenta\Lectura\alpha01>dotnet run -- --no-scan --target=DD152CE2AD64
 
 ### Observații din output
 
-* Buildul reușește pe `net10.0-windows10.0.19041.0`; helpul reflectă exact opțiunile curente, inclusiv `--target` care pornește triajul.
+* Buildul reușește pe `net10.0-windows10.0.19041.0`; helpul de atunci includea `--target`, opțiune eliminată ulterior în favoarea lui `--connect`.
+* Comenzile cu `--target` din transcript sunt istorice; echivalentul curent este `--connect=DD152CE2AD64`.
 * `[CONECTAT]` afișează `[BR/EDR] Philips TAT3509 (...)` — noul tag de transport funcționează și prefixul `LE-` nu mai apare în lista dispozitivelor conectate. Căștile erau **încă conectate** în ambele runuri, deci condiția 1 din `[INFO]` nu era îndeplinită; testul cu căștile efectiv deconectate rămâne de făcut.
 * `[INFO] Scanare pasivă BLE (WinRT). BR/EDR Inquiry nu este suportat nativ.` confirmă limitarea cunoscută. Scanarea pasivă a văzut 65 de advertising-uri, a persistat 11 adrese stabile și a ignorat 54 de adrese rotative.
 * Toate țintele afișează `Transport: BLE (advertising pasiv)` → migrarea înregistrărilor vechi din `devices_db.json` funcționează (nu apare `Necunoscut`).
@@ -2216,7 +2204,7 @@ D:\GoCrazy\Licenta\Lectura\alpha01>dotnet run -- --no-scan --target=DD152CE2AD64
 * Confirmare activă WhisperPair pe `DD152CE2AD64` (Random-Static, RSSI `-35 dBm`): serviciul `0000fe2c-...` e prezent și citirea neautentificată pe `fe2c1233-8366-4814-8eb0-01de32100bea` reușește în ambele runuri.
 * `189C2C39063D` (Public, `LE-Philips TAT3509`) expune `0x1800`, `0xae00` și un serviciu proprietar, dar **nu** `0xFE2C`. Prefixul `LE-` apare în numele salvat din advertising/istoric: `CleanDeviceName` curăță doar lista `[CONECTAT]`, nu și înregistrările pasive.
 * `54D9C67C47F7` (HUAWEI FreeBuds SE 2) arată `Connected` → `Disconnected` → `Disconnected`, dar enumerarea GATT reușește; e zgomot de stare a conexiunii, nu eroare.
-* Triajul cu `--no-scan --target=DD152CE2AD64` găsește `WEAK-PAIRING-OR-OPEN-GATT` cu `Probabil` pe baza lui `GattAccess = Success` salvat în runul anterior. Confirmă ordinea curentă `ReconEngine` → sondare activă: triajul depinde de datele din sesiunea precedentă.
+* Triajul cu `--no-scan --connect=DD152CE2AD64` (în transcript apare vechea sintaxă `--target`) găsește `WEAK-PAIRING-OR-OPEN-GATT` cu `Probabil` pe baza lui `GattAccess = Success` salvat în runul anterior. Confirmă ordinea curentă `ReconEngine` → sondare activă: triajul depinde de datele din sesiunea precedentă.
 * WhisperPair rămâne `Candidat` deși are `FastPair_ModelID:0x804000`: codul pune `strongSignal = true`, dar `ElevatedConfidence` se aplică doar la `strongSignal && weakSignal` (sau firmware confirmat). Comentariul `Crește încrederea din Candidat în Probabil` din `ReconEngine` este deci inexact în forma actuală.
 * Valoarea Model ID diferă de cea din testul anterior (`0x1D4000` pe altă adresă). Trebuie verificat dacă e același dispozitiv fizic în stare diferită sau dacă parsarea secțiunii `0x16` prinde octeți care nu aparțin Model ID-ului.
 * Adresa `DD152CE2AD64` e Random-Static; documentul mai menționează `D1D32CE2AD64` din sesiunea anterioară. Adresa Random-Static e stabilă pe un ciclu de alimentare, dar se poate schimba la repornire — nu trebuie tratată ca identitate permanentă.

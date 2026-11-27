@@ -31,7 +31,7 @@ public class Program
         var passiveDetection = new PassiveDetectionService(lookupStore, historyStore);
         var detectedDevices = await passiveDetection.ExecuteAsync(opts);
 
-        // Filtrare optionala pe o tinta anume (--target=... sau --connect=... / --connection=...)
+        // Filtrare optionala pe o tinta anume (--connect=<filtru>)
         var filteredDevices = detectedDevices
             .Where(d => opts.MatchesFilter(d.MacAddress, d.Name))
             .ToList();
@@ -39,7 +39,7 @@ public class Program
         string scope = opts.ScanSeconds > 0 ? "in sesiune" : "din istoric (--no-scan)";
         Console.WriteLine($"[REZULTAT] Dispozitive {scope}: {detectedDevices.Count} (afisate/analizate: {filteredDevices.Count})");
 
-        // 3. Triaj pasiv (ReconEngine) cand se cere --connect sau --target
+        // 3. Triaj pasiv (ReconEngine) doar cand se cere --connect
         if (opts.Connect)
         {
             var reconEngine = ReconEngine.LoadFromFile(Path.Combine(baseDir, "vulnerabilities.json"));
