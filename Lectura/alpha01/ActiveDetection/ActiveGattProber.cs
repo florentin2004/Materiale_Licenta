@@ -1,6 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,10 +11,15 @@ namespace BluetoothAuditor;
 
 public static class ActiveGattProber
 {
-    public static async Task ProbeAsync(BluetoothDeviceRecord record)
+    /// <summary>
+    /// Sondează un dispozitiv BLE: enumeră serviciile GATT, citește Generic Access (0x1800)
+    /// și Device Information Service (0x180A), și execută sonda neinvazivă pe serviciul Fast Pair (0xFE2C).
+    /// Include retry logic pentru a gestiona dispozitivele care răspund greu la prima conexiune.
+    /// </summary>
+    public static async Task ProbeAsync(BluetoothDeviceRecord record, int timeoutSeconds = 15, int maxRetries = 3)
     {
-        record.Security ??= new();
-        record.Hardware ??= new();
+        record.Security ??= new PassiveSecurityInfo();
+        record.Hardware ??= new PassiveHardwareInfo();
         record.Security.ExposedServices ??= new();
         record.Security.AuditNotes ??= new();
 
@@ -30,91 +35,107 @@ public static class ActiveGattProber
             ? BluetoothAddressType.Public
             : BluetoothAddressType.Random;
 
-        using var bleDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(btAddress, addressType);
+        Console.WriteLine($"  -> Tentativa conectare la {record.MacAddress} ({record.Name})...");
+        Console.WriteLine($"  -> Tip adresă: {record.Advertisement?.AddressKind ?? "necunoscut"}, Timeout: {timeoutSeconds}s, Retry: {maxRetries}");
+
+        // ============================================================
+        // RETRY LOGIC - unele dispozitive BLE răspund greu la prima conexiune
+        // ============================================================
+        BluetoothLEDevice? bleDevice = null;
+
+        for (int attempt = 1; attempt <= maxRetries; attempt++)
+        {
+            try
+            {
+                Console.WriteLine($"  -> Încercarea {attempt}/{maxRetries}...");
+
+                var connectionTask = BluetoothLEDevice.FromBluetoothAddressAsync(btAddress, addressType).AsTask();
+                var timeoutTask = Task.Delay(TimeSpan.FromSeconds(timeoutSeconds));
+
+                var completedTask = await Task.WhenAny(connectionTask, timeoutTask);
+
+                if (completedTask == timeoutTask)
+                {
+                    Console.WriteLine($"  -> Timeout la conectare ({timeoutSeconds}s). Se reîncearcă...");
+                    continue;
+                }
+
+                bleDevice = await connectionTask;
+
+                if (bleDevice != null)
+                {
+                    Console.WriteLine($"  -> Conectare reușită la încercarea {attempt}.");
+                    break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  -> Eroare la încercarea {attempt}: {ex.Message}");
+            }
+
+            if (attempt < maxRetries)
+            {
+                Console.WriteLine($"  -> Așteptare 3 secunde înainte de următoarea încercare...");
+                await Task.Delay(3000);
+            }
+        }
+
         if (bleDevice == null)
         {
-            record.Security.GattAccess = "DeviceNotFound";
-            Console.WriteLine("  -> Acces GATT esuat: DeviceNotFound");
+            record.Security.GattAccess = "Unreachable";
+            record.Security.AuditNotes.Add(
+                "Dispozitiv indisponibil pentru sondare GATT după mai multe încercări. " +
+                "Posibile cauze: conectat la alt dispozitiv, oprit, în afara razei, sau radio ocupat.");
+            Console.WriteLine($"  -> Acces GATT esuat: Unreachable (după {maxRetries} încercări)");
             return;
         }
 
-        var servicesResult = await bleDevice.GetGattServicesAsync(BluetoothCacheMode.Uncached);
-        record.Security.GattAccess = servicesResult.Status.ToString();
-
-        if (servicesResult.Status != GattCommunicationStatus.Success)
+        using (bleDevice)
         {
-            Console.WriteLine($"  -> Acces GATT esuat: {servicesResult.Status}");
-            return;
-        }
-
-        record.Security.ExposedServices.Clear();
-
-        foreach (var service in servicesResult.Services)
-        {
-            using (service)
+            bleDevice.ConnectionStatusChanged += (s, args) =>
             {
-                string uuidStr = service.Uuid.ToString();
-                record.Security.ExposedServices.Add(uuidStr);
-                Console.WriteLine($"  -> Serviciu GATT: {uuidStr}");
+                Console.WriteLine($"  -> Status conexiune: {bleDevice.ConnectionStatus}");
+            };
 
-                // Generic Access (0x1800) -> Device Name (0x2A00)
-                if (service.Uuid == GattServiceUuids.GenericAccess)
-                {
-                    await ReadGenericAccessNameAsync(service, record);
-                }
-                // Device Information Service (0x180A) -> Firmware, Hardware, Manufacturer
-                else if (service.Uuid == GattServiceUuids.DeviceInformation)
-                {
-                    await ReadDeviceInformationAsync(service, record.Hardware);
-                }
-                // Google Fast Pair Service (0xFE2C) -> sondă activă neinvazivă (citire neautentificată)
-                else if (service.Uuid.ToString().Contains("fe2c", StringComparison.OrdinalIgnoreCase))
-                {
-                    await ProbeFastPairUnauthenticatedReadAsync(service, record);
-                }
+            var servicesResult = await bleDevice.GetGattServicesAsync(BluetoothCacheMode.Uncached);
+            record.Security.GattAccess = servicesResult.Status.ToString();
+
+            if (servicesResult.Status != GattCommunicationStatus.Success)
+            {
+                Console.WriteLine($"  -> Acces GATT esuat: {servicesResult.Status}");
+                record.Security.AuditNotes.Add($"Enumerare servicii eșuată: {servicesResult.Status}");
+                return;
             }
-        }
-    }
 
-    private static async Task ProbeFastPairUnauthenticatedReadAsync(GattDeviceService fastPairService, BluetoothDeviceRecord record)
-    {
-        Console.WriteLine("  -> [!] Serviciu Google Fast Pair (0xFE2C) detectat. Se testeaza accesul neautentificat...");
+            record.Security.ExposedServices.Clear();
 
-        var charsResult = await fastPairService.GetCharacteristicsAsync(BluetoothCacheMode.Uncached);
-        if (charsResult.Status != GattCommunicationStatus.Success)
-            return;
-
-        bool unauthenticatedReadSuccess = false;
-
-        foreach (var ch in charsResult.Characteristics)
-        {
-            if (ch.CharacteristicProperties.HasFlag(GattCharacteristicProperties.Read))
+            foreach (var service in servicesResult.Services)
             {
-                try
+                using (service)
                 {
-                    var readResult = await ch.ReadValueAsync(BluetoothCacheMode.Uncached);
-                    if (readResult.Status == GattCommunicationStatus.Success)
+                    string uuidStr = service.Uuid.ToString();
+                    record.Security.ExposedServices.Add(uuidStr);
+                    Console.WriteLine($"  -> Serviciu GATT: {uuidStr}");
+
+                    // Generic Access (0x1800) -> Device Name (0x2A00)
+                    if (service.Uuid == GattServiceUuids.GenericAccess)
                     {
-                        unauthenticatedReadSuccess = true;
-                        Console.WriteLine($"  -> [!] SUCCES: Citire neautentificata pe caracteristica {ch.Uuid}");
-                        break;
+                        await ReadGenericAccessNameAsync(service, record);
+                    }
+                    // Device Information Service (0x180A) -> Firmware, Hardware, Manufacturer
+                    else if (service.Uuid == GattServiceUuids.DeviceInformation)
+                    {
+                        await ReadDeviceInformationAsync(service, record.Hardware);
+                    }
+                    // ========================================================
+                    // SONDĂ ACTIVĂ WHISPERPAIR: Serviciul Google Fast Pair (0xFE2C)
+                    // ========================================================
+                    else if (uuidStr.Contains("fe2c", StringComparison.OrdinalIgnoreCase))
+                    {
+                        await ProbeFastPairUnauthenticatedReadAsync(service, record);
                     }
                 }
-                catch
-                {
-                    // Ignoram erorile individuale de citire si continuam cu urmatoarea caracteristica.
-                }
             }
-        }
-
-        record.Security.AuditNotes ??= new List<string>();
-        if (unauthenticatedReadSuccess && !record.Security.IsPaired)
-        {
-            record.Security.AuditNotes.Add("CRITIC: Serviciu Fast Pair accesibil fara pairing/bonding. Dispozitivul este un candidat puternic pentru WhisperPair.");
-        }
-        else
-        {
-            record.Security.AuditNotes.Add("INFO: Serviciu Fast Pair prezent, dar accesul este restrictionat sau dispozitivul este deja imperecheat (protejat).");
         }
     }
 
@@ -132,7 +153,6 @@ public static class ActiveGattProber
             return;
 
         Console.WriteLine($"  -> Nume GATT (0x2A00): {gattName}");
-
         if (string.IsNullOrWhiteSpace(record.Name) ||
             string.Equals(record.Name, "(fara nume)", StringComparison.OrdinalIgnoreCase))
         {
@@ -158,6 +178,69 @@ public static class ActiveGattProber
                 hardware.HardwareRevision = value;
             else if (characteristic.Uuid == GattCharacteristicUuids.ManufacturerNameString)
                 hardware.GattManufacturerName = value;
+        }
+    }
+
+    /// <summary>
+    /// SONDĂ ACTIVĂ PENTRU WHISPERPAIR (CVE-2025-36911)
+    /// Testează dacă serviciul Google Fast Pair (0xFE2C) poate fi citit fără pairing/bonding.
+    /// </summary>
+    private static async Task ProbeFastPairUnauthenticatedReadAsync(GattDeviceService fastPairService, BluetoothDeviceRecord record)
+    {
+        Console.WriteLine("  -> [!] Serviciu Google Fast Pair (0xFE2C) detectat. Se testează accesul neautentificat...");
+
+        var charsResult = await fastPairService.GetCharacteristicsAsync(BluetoothCacheMode.Uncached);
+        if (charsResult.Status != GattCommunicationStatus.Success)
+        {
+            Console.WriteLine($"  -> Nu s-au putut enumera caracteristicile: {charsResult.Status}");
+            record.Security.AuditNotes.Add($"Fast Pair: enumerare caracteristici eșuată ({charsResult.Status})");
+            return;
+        }
+
+        bool unauthenticatedReadSuccess = false;
+        string? successfulCharUuid = null;
+
+        foreach (var ch in charsResult.Characteristics)
+        {
+            if (ch.CharacteristicProperties.HasFlag(GattCharacteristicProperties.Read))
+            {
+                try
+                {
+                    var readResult = await ch.ReadValueAsync(BluetoothCacheMode.Uncached);
+                    if (readResult.Status == GattCommunicationStatus.Success)
+                    {
+                        unauthenticatedReadSuccess = true;
+                        successfulCharUuid = ch.Uuid.ToString();
+                        Console.WriteLine($"  -> [!] SUCCES: Citire neautentificată pe caracteristica {ch.Uuid}");
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"  -> Citire eșuată pe {ch.Uuid}: {readResult.Status}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"  -> Excepție la citirea {ch.Uuid}: {ex.Message}");
+                }
+            }
+        }
+
+        if (unauthenticatedReadSuccess && !record.Security.IsPaired)
+        {
+            record.Security.AuditNotes.Add(
+                $"CRITIC: Serviciu Fast Pair accesibil fără pairing pe caracteristica {successfulCharUuid}. " +
+                $"Dispozitivul este un candidat puternic pentru WhisperPair (CVE-2025-36911).");
+        }
+        else if (unauthenticatedReadSuccess && record.Security.IsPaired)
+        {
+            record.Security.AuditNotes.Add(
+                $"INFO: Serviciu Fast Pair accesibil, dar dispozitivul este deja împerecheat (protejat prin bonding).");
+        }
+        else
+        {
+            record.Security.AuditNotes.Add(
+                "INFO: Serviciu Fast Pair prezent, dar toate caracteristicile necesită autentificare.");
         }
     }
 

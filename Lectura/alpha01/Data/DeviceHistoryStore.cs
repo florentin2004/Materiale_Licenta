@@ -42,7 +42,15 @@ public class DeviceHistoryStore
                 foreach (var kv in loaded)
                 {
                     if (kv.Value != null)
+                    {
+                        // Compatibilitate cu istoricul salvat inainte de introducerea BluetoothTransport.
+                        if (kv.Value.Security?.Transport == BluetoothTransport.Unknown &&
+                            kv.Value.Advertisement != null)
+                        {
+                            kv.Value.Security.Transport = BluetoothTransport.BleAdvertising;
+                        }
                         _records[kv.Key] = kv.Value;
+                    }
                 }
             }
 
@@ -120,7 +128,8 @@ public class DeviceHistoryStore
                     Name = name ?? string.Empty,
                     Vendor = _lookupStore.ResolveMacVendor(obs.Address, isRandom, companies),
                     FirstSeen = DateTime.UtcNow,
-                    LastScanMode = "Passive"
+                    LastScanMode = "Passive",
+                    Security = new PassiveSecurityInfo { Transport = BluetoothTransport.BleAdvertising }
                 };
                 _records[mac] = record;
             }

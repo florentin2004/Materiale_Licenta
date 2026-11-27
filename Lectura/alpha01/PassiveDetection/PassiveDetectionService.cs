@@ -37,7 +37,6 @@ public class PassiveDetectionService
         );
 
         var sessionStart = DateTime.UtcNow;
-
         var observations = await CaptureAdvertisementsAsync(options);
         var (persisted, transient) = _historyStore.ApplyPassiveObservations(observations, options.Debug);
         await _historyStore.SaveAsync();
@@ -45,15 +44,11 @@ public class PassiveDetectionService
         sw.Stop();
         Console.WriteLine($"[PASIV] Finalizat in {sw.ElapsedMilliseconds} ms | observate: {observations.Count}, persistate: {persisted}, rotative ignorate: {transient}.");
 
-        // Cu scanare: doar dispozitivele vazute in aceasta sesiune.
-        // Cu --no-scan: tot istoricul salvat (triaj offline).
-        // ToUniversalTime() acopera si inregistrarile vechi salvate cu DateTime.Now (Kind=Local).
         bool sessionOnly = options.ScanSeconds > 0;
-
         return _historyStore.AllRecords
             .Where(r => r.Advertisement != null &&
                         (!sessionOnly || r.Advertisement.LastAdvertised.ToUniversalTime() >= sessionStart))
-            .OrderByDescending(r => r.LastRssi ?? short.MinValue)
+            .OrderByDescending(r => r.Advertisement?.LastRssi ?? short.MinValue)
             .ToList();
     }
 
@@ -67,25 +62,21 @@ public class PassiveDetectionService
                 Console.WriteLine("[PASIV] Nu exista adaptor Bluetooth; scanarea este sarita.");
                 return false;
             }
-
             if (!adapter.IsLowEnergySupported)
             {
                 Console.WriteLine("[PASIV] Adaptorul nu suporta Bluetooth LE; scanarea este sarita.");
                 return false;
             }
-
             var radio = await adapter.GetRadioAsync();
             if (radio != null && radio.State != RadioState.On)
             {
                 Console.WriteLine($"[PASIV] Radioul Bluetooth nu este pornit (stare: {radio.State}); scanarea este sarita.");
                 return false;
             }
-
             return true;
         }
         catch (Exception ex)
         {
-            // Verificarea in sine a esuat; lasam watcher-ul sa incerce.
             Console.WriteLine($"[PASIV] Nu am putut verifica starea adaptorului: {ex.Message}");
             return true;
         }
@@ -98,6 +89,10 @@ public class PassiveDetectionService
 
         if (!await IsBluetoothAvailableAsync())
             return new List<AdvertisementObservation>();
+
+        // Notă tehnică: WinRT nu suportă scanare pasivă BR/EDR (Inquiry/EIR).
+        // Dispozitivele Classic sunt vizibile doar dacă sunt deja împerecheate cu gazda.
+        Console.WriteLine("[INFO] Scanare pasivă BLE (WinRT). BR/EDR Inquiry nu este suportat nativ.");
 
         var seen = new ConcurrentDictionary<ulong, AdvertisementObservation>();
         var watcher = new BluetoothLEAdvertisementWatcher
@@ -141,22 +136,29 @@ public class PassiveDetectionService
                 foreach (var uuid in args.Advertisement.ServiceUuids)
                     entry.ServiceUuids.Add(uuid.ToString());
 
+                // ============================================================
+                // PARSARE AVANSATĂ: AD Structure Type 0x16 (Service Data - 16 bit UUID)
+                // ============================================================
                 foreach (var section in args.Advertisement.DataSections)
                 {
                     if (section.DataType != 0x16 || section.Data.Length < 2) continue;
 
                     byte[] raw = section.Data.ToArray();
                     int uuid16 = raw[0] | (raw[1] << 8);
-
-                    // Adaugam UUID-ul standardizat
                     entry.ServiceUuids.Add($"0000{uuid16:x4}-0000-1000-8000-00805f9b34fb");
 
-                    // Extragem Model ID-ul Google Fast Pair (daca este prezent)
+                    // ========================================================
+                    // EXTRAGERE MODEL ID GOOGLE FAST PAIR (WhisperPair)
+                    // Structura: [UUID16 (2 bytes)] [Model ID (3 bytes)] [...]
+                    // ========================================================
                     if (uuid16 == 0xFE2C && raw.Length >= 5)
                     {
-                        // Model ID-ul este stocat pe 3 octeti, little-endian
                         int modelId = raw[2] | (raw[3] << 8) | (raw[4] << 16);
                         entry.ServiceUuids.Add($"FastPair_ModelID:0x{modelId:X6}");
+                        if (options.Debug)
+                        {
+                            Console.WriteLine($"  [DEBUG] Fast Pair Model ID detectat: 0x{modelId:X6} pentru {args.BluetoothAddress:X12}");
+                        }
                     }
                 }
             }

@@ -194,15 +194,19 @@ public class ReconEngine
             }
         }
 
-        // Verificare specifica pentru Model ID Fast Pair extras din advertising
-        var modelIdUuid = allUuids.FirstOrDefault(u => u.StartsWith("FastPair_ModelID:", StringComparison.OrdinalIgnoreCase));
-        if (modelIdUuid != null &&
-            (string.Equals(rule.Id, "WHISPERPAIR-GFPS", StringComparison.OrdinalIgnoreCase) ||
-             sig.ServiceUuidPrefixes.Any(p => p.StartsWith("FastPair_ModelID:", StringComparison.OrdinalIgnoreCase))))
-        {
-            matched.Add($"Google Fast Pair Model ID detectat: {modelIdUuid}");
-            strongSignal = true;
-        }
+// ============================================================
+// VERIFICARE SPECIFICĂ PENTRU MODEL ID FAST PAIR (Semnal Puternic)
+// Acesta este un semnal mult mai specific decât simplul UUID 0xFE2C
+// ============================================================
+var fastPairModelId = allUuids.FirstOrDefault(u =>
+    u.StartsWith("FastPair_ModelID:", StringComparison.OrdinalIgnoreCase));
+if (fastPairModelId != null &&
+    (string.Equals(rule.Id, "WHISPERPAIR-GFPS", StringComparison.OrdinalIgnoreCase) ||
+     sig.ServiceUuidPrefixes.Any(p => p.StartsWith("FastPair_ModelID:", StringComparison.OrdinalIgnoreCase))))
+{
+    matched.Add($"Google Fast Pair Model ID detectat: {fastPairModelId}");
+    strongSignal = true; // Crește încrederea din Candidat în Probabil
+}
 
         if (sig.CompanyIds.Count > 0)
         {

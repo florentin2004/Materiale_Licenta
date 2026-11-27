@@ -4,6 +4,18 @@ using System.Text.Json.Serialization;
 
 namespace BluetoothAuditor;
 
+/// <summary>
+/// Tipul de transport Bluetooth. Distincție critică pentru Dual-Mode devices
+/// (același dispozitiv fizic poate avea adrese diferite pe Classic și BLE).
+/// </summary>
+public enum BluetoothTransport
+{
+    Unknown,
+    BleAdvertising,     // Văzut doar pasiv prin advertising, neconectat
+    BleConnected,       // BLE conectat/împerecheat cu gazda
+    BrEdrClassic        // Bluetooth Classic (BR/EDR) conectat/împerecheat
+}
+
 public class AdvertisementObservation
 {
     public ulong Address { get; set; }
@@ -25,13 +37,9 @@ public class PassiveAdvertisementSnapshot
     public int? LastRssi { get; set; }
     public string? AddressKind { get; set; }
     public bool Connectable { get; set; }
-
-    /// <summary>Nume rezolvate din Bluetooth SIG (pentru afisare / cuvinte cheie).</summary>
+    /// <summary>Nume rezolvate din Bluetooth SIG (pentru afișare / cuvinte cheie).</summary>
     public List<string> Companies { get; set; } = new();
-
-    /// <summary>ID-uri brute de companie (pentru potrivirea exacta in reguli).</summary>
     public List<int> CompanyIds { get; set; } = new();
-
     public List<string> ServiceUuids { get; set; } = new();
 }
 
@@ -57,7 +65,27 @@ public class PassiveHardwareInfo
 
 public class PassiveSecurityInfo
 {
-    public string ConnectionType { get; set; } = "BLE (doar advertising)";
+    /// <summary>
+    /// Transportul Bluetooth detectat. Înlocuiește șirul liber "BLE (doar advertising)"
+    /// cu o etichetă tipizată pentru a preveni confuziile între Classic și BLE.
+    /// </summary>
+    public BluetoothTransport Transport { get; set; } = BluetoothTransport.Unknown;
+
+    /// <summary>
+    /// Numele human-readable al transportului (folosit la afișare / JSON export).
+    /// </summary>
+    public string ConnectionType
+    {
+        get => Transport switch
+        {
+            BluetoothTransport.BleAdvertising => "BLE (advertising pasiv)",
+            BluetoothTransport.BleConnected => "BLE (conectat/împerecheat)",
+            BluetoothTransport.BrEdrClassic => "BR/EDR (Classic)",
+            _ => "Necunoscut"
+        };
+        set { /* setter gol pentru compatibilitate JSON la deserializare */ }
+    }
+
     public bool IsPaired { get; set; }
     public string? ProtectionLevel { get; set; }
     public string? GattAccess { get; set; }

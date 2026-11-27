@@ -3,7 +3,7 @@
 ## 1. Etapele de execuție (Pipeline)
 
 1. **Verificare dispozitive conectate la gazdă (`ConnectedDeviceChecker`)**
-   - Interoghează Windows (`DeviceInformation`) după dispozitivele Bluetooth Classic și BLE aflate în starea `BluetoothConnectionStatus.Connected` și le afișează în consolă înainte de scanare.
+   - Interoghează Windows (`DeviceInformation`) cu `GetDeviceSelectorFromPairingState(true)` pentru Bluetooth Classic (BR/EDR) și BLE, filtrează după proprietatea `System.Devices.Aep.IsConnected`, elimină duplicatele Dual-Mode după `DeviceId` și curăță prefixul artefact `LE-` din nume.
    - *Exemplu observat (hardware personal de test):* `[Classic] Philips TAT3509` cu adresa publică `18:9C:2C:E2:AD:64`.
 
 2. **Încărcare baze de date & istoric (în paralel)**
@@ -24,6 +24,7 @@
 5. **Scanare activă / Sondare GATT (`--active-scan`) — integrată**
    - Modulul `ActiveGattProber.ProbeAsync` deschide conexiuni BLE (`BluetoothLEDevice`), enumeră serviciile GATT, citește *Device Information Service (`0x180A`)* și *Generic Access (`0x1800`)* și, la detectarea serviciului **Google Fast Pair (`0xFE2C`)**, testează **citirea neautentificată** (`ReadValueAsync`) pe caracteristicile cu proprietatea `Read` fără a forța pairing/bonding sau scrieri distructive.
    - Dacă citirea neautentificată reușește pe un dispozitiv neîmperecheat (`!record.Security.IsPaired`), adaugă o notă `CRITIC` în `record.Security.AuditNotes` (indicator de configurare slabă / posibilă susceptibilitate la **WhisperPair / CVE-2025-36911**); altfel adaugă o notă `INFO`.
+   - Sondarea rulează cu `timeoutSeconds: 15` și `maxRetries: 3` (pauză de 3 secunde între încercări) și afișează în consolă condițiile necesare rezultatelor corecte: ținta nu trebuie să fie conectată la laptop sau la telefon, trebuie să fie în rază (RSSI ideal > -70 dBm) și în mod discoverable dacă e cazul.
    - Atenție: această etapă **nu mai este pasivă** — deschide conexiune BLE către țintă.
 
 ---
@@ -32,11 +33,11 @@
 
 ### Orchestrare și nivel de intrare
 * **`Program`** (`Program.cs`): Punctul de intrare al aplicației (`Main`). Parsează argumentele din linia de comandă (`--scan`, `--scan=N`, `--no-scan`, `--active-scan`, `--connect=<filtru>`, `--target=`), încarcă în paralel fișierele de referință și coordonează ordinea etapelor: verificare dispozitive conectate $\rightarrow$ scanare pasivă $\rightarrow$ filtrare $\rightarrow$ triaj `ReconEngine` $\rightarrow$ sondare activă opțională (`ActiveGattProber`, prin `--active-scan`) $\rightarrow$ salvare rezultate.
-* **`ConnectedDeviceChecker`**: Verifică ce dispozitive Bluetooth (Classic și BLE) sunt deja conectate la laptop în momentul pornirii aplicației, interogând API-ul Windows `DeviceInformation` și eliminând duplicatele.
+* **`ConnectedDeviceChecker`**: Verifică ce dispozitive Bluetooth (Classic / BR/EDR și BLE) sunt deja conectate la laptop în momentul pornirii aplicației. Folosește selectoare separate pentru dispozitive împerecheate, citește `System.Devices.Aep.IsConnected`, elimină duplicatele Dual-Mode după același `DeviceId` și elimină prefixul `LE-` din numele afișat (`ConnectedDeviceInfo(Name, Id, Transport)`).
 
 ### Achiziție de date și persistență
 * **`PassiveDetectionService`**: Motorul de scanare pasivă BLE. Pornește `BluetoothLEAdvertisementWatcher` pe durata configurată, interceptează pachetele *Advertising* și *Scan Response*, parsează secțiunile `0x16` (inclusiv `FastPair_ModelID:0xXXXXXX` pentru `0xFE2C`), filtrează adresele rotative temporare și actualizează înregistrările stabile în baza de date.
-* **`DeviceHistoryStore`**: Gestionează citirea și scrierea fișierului `devices_db.json`. Încarcă istoricul la pornire (`LoadAsync`), aplică observațiile pasive (`ApplyPassiveObservations`), salvează modificările în format JSON (`SaveAsync`) și generează notele pasive (`BuildPassiveNotes`).
+* **`DeviceHistoryStore`**: Gestionează citirea și scrierea fișierului `devices_db.json`. Încarcă istoricul la pornire (`LoadAsync`), aplică observațiile pasive (`ApplyPassiveObservations`), salvează modificările în format JSON (`SaveAsync`) și generează notele pasive (`BuildPassiveNotes`). Înregistrările noi primesc `Security.Transport = BluetoothTransport.BleAdvertising`, iar cele vechi, fără câmpul `Transport`, sunt migrate la aceeași valoare la încărcare.
 
 ### Utilitare de identificare și rezolvare
 * **`PassiveDetectionService.ClassifyAddress`**: Normalizează adresele MAC (12 caractere hexazecimale fără separatori) și determină tipul adresei BLE analizând biții primului octet:
@@ -55,8 +56,89 @@
 * **`BluetoothDeviceRecord`**: Entitatea centrală salvată în `devices_db.json`, care agregă identitatea de bază (`MacAddress`, `Name`, `Vendor`), metadatele de timp (`FirstSeen`, `LastConnected`, `ConnectionCount`, `LastScanMode`) și sub-obiectele de mai jos:
 * **`PassiveChipsetInfo`**: Date despre controller-ul Bluetooth / Link Manager Protocol (`LmpManufacturerId`, `LmpManufacturerName`, `LmpVersion`, `LmpSubversion`) și identificatorii PnP / Device ID (`DeviceIdSource`, `DeviceIdVendorId`, `DeviceIdVendorName`, `DeviceIdProductId`).
 * **`PassiveHardwareInfo`**: Identificatori hardware Windows (`HardwareIds`) și informații citite activ prin GATT DIS (`GattManufacturerName`, `HardwareRevision`, `FirmwareRevision`).
-* **`PassiveSecurityInfo`**: Postura de securitate și conectivitate (`ConnectionType`, `IsPaired`, `ProtectionLevel`, `GattAccess`, `ExposedServices`, `AuditNotes`).
+* **`PassiveSecurityInfo`**: Postura de securitate și conectivitate. Câmpul tipizat `Transport` (`BluetoothTransport.Unknown` / `BleAdvertising` / `BleConnected` / `BrEdrClassic`) înlocuiește șirul liber anterior; `ConnectionType` este proprietatea derivată afișată în consolă și JSON. Restul câmpurilor: `IsPaired`, `ProtectionLevel`, `GattAccess`, `ExposedServices`, `AuditNotes`.
 * **`PassiveAdvertisementSnapshot`**: Ultimul instantaneu recepționat în pachetele BLE Advertising (`LastAdvertised`, `LastRssi`, `AddressKind`, `Connectable`, `Companies`, `CompanyIds`, `ServiceUuids`).
+
+---
+
+## 2.1 Structura folderelor (layout)
+
+```text
+Lectura/alpha01/
+├─ Program.cs                        # Main, orchestrația CLI (ScanOptions)
+├─ alpha0.1.csproj                   # proiect .NET 10 windows10.0.19041.0 (WinRT)
+├─ alpha0.1.slnx                     # soluția Visual Studio
+├─ flux.md                           # documentul unic: arhitectură + cod + așteptări testare
+├─ company_identifiers.yaml          # registry Bluetooth SIG (~4071 companii)
+├─ master_oui.txt                    # prefixe OUI IEEE/Wireshark
+├─ Models/
+│  ├─ ScanOptions.cs                 # parsare --help/--scan/--no-scan/--target/--connect/--active-scan
+│  ├─ BluetoothDeviceRecord.cs       # entitatea persistată + enum BluetoothTransport
+│  └─ ConnectedDeviceChecker.cs      # inventar dispozitive conectate (Classic vs BLE)
+├─ PassiveDetection/
+│  └─ PassiveDetectionService.cs     # watcher BLE, clasificare adresă, FastPair_ModelID
+├─ ActiveDetection/
+│  └─ ActiveGattProber.cs            # sondare GATT cu retry/timeout + proba 0xFE2C
+├─ Analysis/
+│  ├─ ReconEngine.cs                 # triaj pasiv pe reguli
+│  └─ vulnerabilities.json           # catalogul de reguli (CVE / CWE)
+├─ Data/
+│  ├─ DeviceHistoryStore.cs          # citire/scriere devices_db.json
+│  └─ PassiveLookupStore.cs          # OUI + Bluetooth SIG
+├─ bin/Debug/net10.0-windows10.0.19041.0/
+│  ├─ devices_db.json                # istoricul persistent (generat la rulare)
+│  └─ recon_targets.json             # candidații triajului (generat la rulare)
+└─ obj/                              # artefacte intermediate de build
+```
+
+### Fluxul de date (diagramă Mermaid)
+
+```mermaid
+flowchart TD
+    A[Program.Main / ScanOptions] --> B[ConnectedDeviceChecker]
+    B -->|Classic vs BLE, dedup| C[PassiveDetectionService]
+    C -->|advertising + FastPair_ModelID| D[DeviceHistoryStore]
+    D -->|devices_db.json| E[ReconEngine]
+    R[vulnerabilities.json] --> E
+    E -->|candidați| F[recon_targets.json]
+    F --> G{--active-scan?}
+    G -->|da| H[ActiveGattProber: 15s timeout, 3 retry]
+    H -->|GattAccess / AuditNotes| D
+    G -->|nu| I[Output consolă]
+```
+
+### Modelul de date central (diagramă Mermaid UML)
+
+```mermaid
+classDiagram
+    class BluetoothDeviceRecord {
+        +string MacAddress
+        +string Name
+        +string Vendor
+        +PassiveChipsetInfo Chipset
+        +PassiveHardwareInfo Hardware
+        +PassiveSecurityInfo Security
+        +PassiveAdvertisementSnapshot Advertisement
+        +string LastScanMode
+    }
+    class PassiveSecurityInfo {
+        +BluetoothTransport Transport
+        +string ConnectionType
+        +bool IsPaired
+        +string GattAccess
+        +List~string~ ExposedServices
+        +List~string~ AuditNotes
+    }
+    class PassiveAdvertisementSnapshot {
+        +DateTime LastAdvertised
+        +int LastRssi
+        +string AddressKind
+        +bool Connectable
+        +List~string~ ServiceUuids
+    }
+    BluetoothDeviceRecord *-- PassiveSecurityInfo
+    BluetoothDeviceRecord *-- PassiveAdvertisementSnapshot
+```
 
 ---
 
@@ -81,13 +163,36 @@ Testarea se realizează pe căștile personale **Philips TAT3509**, unde acelaș
 
 ---
 
+## Observații așteptate (înainte de testare, căștile deconectate)
+
+Această secțiune descrie **comportamentul așteptat**, nu un output real. Outputul efectiv se adaugă separat, după rularea testului.
+
+### Cum ar trebui să arate dispozitivul Philips TAT3509 după actualizare
+
+* **Classic (BR/EDR):** adresa publică `18:9C:2C:E2:AD:64`. Când căștile sunt deconectate de laptop, `ConnectedDeviceChecker` **nu** trebuie să le mai afișeze la `[CONECTAT]`. Dacă sunt reconnectate, linia trebuie etichetată `[BR/EDR] Philips TAT3509 (...)` — fără prefixul `LE-`.
+* **BLE:** adresa `Random-Static` `D1:D3:2C:E2:AD:64` rămâne detectabilă prin advertising atâta timp cât căștile emit pachete. În `devices_db.json` trebuie să apară cu `Security.Transport = BleAdvertising`, deci `ConnectionType = "BLE (advertising pasiv)"`, nu vechiul text liber `"BLE (doar advertising)"`.
+* **Dual-Mode:** același dispozitiv fizic nu trebuie duplicat. Windows poate raporta numele `LE-Philips TAT3509`; `CleanDeviceName` elimină prefixul, iar dedupul după `DeviceId` împiedică apariția a două intrări pentru aceeași legătură.
+* **Fast Pair:** în `ServiceUuids` trebuie să apară `0000fe2c-0000-1000-8000-00805f9b34fb` și `FastPair_ModelID:0x1D4000` (cei 3 octeți little-endian din `0x16`). `ReconEngine` trebuie să Ridice încrederea pentru `WHISPERPAIR-GFPS` de la `Candidat` la `Probabil`.
+
+### La rularea `dotnet run -- --no-scan --target=2CE2AD64 --active-scan`
+
+1. `[CONECTAT] Nu exista niciun dispozitiv Bluetooth conectat la laptop in acest moment.` — consecința directă a deconectării căștilor.
+2. Triajul pasiv poate încă raporta candidați `WhisperPair` din istoric (`Service UUID` / `FastPair_ModelID`), dar candidatul `WEAK-PAIRING-OR-OPEN-GATT` trebuie să dispară **după** ce o sondare activă a scris `GattAccess = Unreachable` în `devices_db.json`. Înainte de acea actualizare, valoarea veche `Success` poate rămâne în istoric — aceasta este limita ordinii curente `ReconEngine` → sondare activă.
+3. Sondarea activă trebuie să afișeze `Tentativa conectare la ...`, `Tip adresă: Random-Static, Timeout: 15s, Retry: 3`, apoi max. 3 încercări cu mesajul `Așteptare 3 secunde...`. Pentru un dispozitiv oprit/deconectat, rezultatul așteptat este `Acces GATT esuat: Unreachable (după 3 încercări)`.
+4. Dacă scopul este confirmarea activă a WhisperPair, căștile trebuie puse în mod pairing/discoverable; atunci se așteaptă `-> [!] SUCCES: Citire neautentificata pe caracteristica fe2c...` și nota `CRITIC` în `AuditNotes` (doar când `IsPaired == false`).
+5. Linia `Transport: BLE (advertising pasiv)` trebuie afișată pentru fiecare țintă sondată. Înregistrările vechi din `devices_db.json` fără `Transport` sunt migrate la `BleAdvertising` la încărcare, deci nu trebuie să apară `Necunoscut` pentru ele.
+
+> Notă: `Unreachable` poate apărea și când dispozitivul este conectat la altă gazdă (telefon), nu numai când este oprit. Deconectarea de pe laptop elimină doar zgomotul din `[CONECTAT]`, nu și advertisingul BLE.
+
+---
+
 ## COD
 
 "\alpha01\ActiveDetection\ActiveGattProber.cs"
 ```csharp
 using System;
-using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
@@ -98,10 +203,15 @@ namespace BluetoothAuditor;
 
 public static class ActiveGattProber
 {
-    public static async Task ProbeAsync(BluetoothDeviceRecord record)
+    /// <summary>
+    /// Sondează un dispozitiv BLE: enumeră serviciile GATT, citește Generic Access (0x1800)
+    /// și Device Information Service (0x180A), și execută sonda neinvazivă pe serviciul Fast Pair (0xFE2C).
+    /// Include retry logic pentru a gestiona dispozitivele care răspund greu la prima conexiune.
+    /// </summary>
+    public static async Task ProbeAsync(BluetoothDeviceRecord record, int timeoutSeconds = 15, int maxRetries = 3)
     {
-        record.Security ??= new();
-        record.Hardware ??= new();
+        record.Security ??= new PassiveSecurityInfo();
+        record.Hardware ??= new PassiveHardwareInfo();
         record.Security.ExposedServices ??= new();
         record.Security.AuditNotes ??= new();
 
@@ -117,91 +227,107 @@ public static class ActiveGattProber
             ? BluetoothAddressType.Public
             : BluetoothAddressType.Random;
 
-        using var bleDevice = await BluetoothLEDevice.FromBluetoothAddressAsync(btAddress, addressType);
+        Console.WriteLine($"  -> Tentativa conectare la {record.MacAddress} ({record.Name})...");
+        Console.WriteLine($"  -> Tip adresă: {record.Advertisement?.AddressKind ?? "necunoscut"}, Timeout: {timeoutSeconds}s, Retry: {maxRetries}");
+
+        // ============================================================
+        // RETRY LOGIC - unele dispozitive BLE răspund greu la prima conexiune
+        // ============================================================
+        BluetoothLEDevice? bleDevice = null;
+
+        for (int attempt = 1; attempt <= maxRetries; attempt++)
+        {
+            try
+            {
+                Console.WriteLine($"  -> Încercarea {attempt}/{maxRetries}...");
+
+                var connectionTask = BluetoothLEDevice.FromBluetoothAddressAsync(btAddress, addressType).AsTask();
+                var timeoutTask = Task.Delay(TimeSpan.FromSeconds(timeoutSeconds));
+
+                var completedTask = await Task.WhenAny(connectionTask, timeoutTask);
+
+                if (completedTask == timeoutTask)
+                {
+                    Console.WriteLine($"  -> Timeout la conectare ({timeoutSeconds}s). Se reîncearcă...");
+                    continue;
+                }
+
+                bleDevice = await connectionTask;
+
+                if (bleDevice != null)
+                {
+                    Console.WriteLine($"  -> Conectare reușită la încercarea {attempt}.");
+                    break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"  -> Eroare la încercarea {attempt}: {ex.Message}");
+            }
+
+            if (attempt < maxRetries)
+            {
+                Console.WriteLine($"  -> Așteptare 3 secunde înainte de următoarea încercare...");
+                await Task.Delay(3000);
+            }
+        }
+
         if (bleDevice == null)
         {
-            record.Security.GattAccess = "DeviceNotFound";
-            Console.WriteLine("  -> Acces GATT esuat: DeviceNotFound");
+            record.Security.GattAccess = "Unreachable";
+            record.Security.AuditNotes.Add(
+                "Dispozitiv indisponibil pentru sondare GATT după mai multe încercări. " +
+                "Posibile cauze: conectat la alt dispozitiv, oprit, în afara razei, sau radio ocupat.");
+            Console.WriteLine($"  -> Acces GATT esuat: Unreachable (după {maxRetries} încercări)");
             return;
         }
 
-        var servicesResult = await bleDevice.GetGattServicesAsync(BluetoothCacheMode.Uncached);
-        record.Security.GattAccess = servicesResult.Status.ToString();
-
-        if (servicesResult.Status != GattCommunicationStatus.Success)
+        using (bleDevice)
         {
-            Console.WriteLine($"  -> Acces GATT esuat: {servicesResult.Status}");
-            return;
-        }
-
-        record.Security.ExposedServices.Clear();
-
-        foreach (var service in servicesResult.Services)
-        {
-            using (service)
+            bleDevice.ConnectionStatusChanged += (s, args) =>
             {
-                string uuidStr = service.Uuid.ToString();
-                record.Security.ExposedServices.Add(uuidStr);
-                Console.WriteLine($"  -> Serviciu GATT: {uuidStr}");
+                Console.WriteLine($"  -> Status conexiune: {bleDevice.ConnectionStatus}");
+            };
 
-                // Generic Access (0x1800) -> Device Name (0x2A00)
-                if (service.Uuid == GattServiceUuids.GenericAccess)
-                {
-                    await ReadGenericAccessNameAsync(service, record);
-                }
-                // Device Information Service (0x180A) -> Firmware, Hardware, Manufacturer
-                else if (service.Uuid == GattServiceUuids.DeviceInformation)
-                {
-                    await ReadDeviceInformationAsync(service, record.Hardware);
-                }
-                // Google Fast Pair Service (0xFE2C) -> sondă activă neinvazivă (citire neautentificată)
-                else if (service.Uuid.ToString().Contains("fe2c", StringComparison.OrdinalIgnoreCase))
-                {
-                    await ProbeFastPairUnauthenticatedReadAsync(service, record);
-                }
+            var servicesResult = await bleDevice.GetGattServicesAsync(BluetoothCacheMode.Uncached);
+            record.Security.GattAccess = servicesResult.Status.ToString();
+
+            if (servicesResult.Status != GattCommunicationStatus.Success)
+            {
+                Console.WriteLine($"  -> Acces GATT esuat: {servicesResult.Status}");
+                record.Security.AuditNotes.Add($"Enumerare servicii eșuată: {servicesResult.Status}");
+                return;
             }
-        }
-    }
 
-    private static async Task ProbeFastPairUnauthenticatedReadAsync(GattDeviceService fastPairService, BluetoothDeviceRecord record)
-    {
-        Console.WriteLine("  -> [!] Serviciu Google Fast Pair (0xFE2C) detectat. Se testeaza accesul neautentificat...");
+            record.Security.ExposedServices.Clear();
 
-        var charsResult = await fastPairService.GetCharacteristicsAsync(BluetoothCacheMode.Uncached);
-        if (charsResult.Status != GattCommunicationStatus.Success)
-            return;
-
-        bool unauthenticatedReadSuccess = false;
-
-        foreach (var ch in charsResult.Characteristics)
-        {
-            if (ch.CharacteristicProperties.HasFlag(GattCharacteristicProperties.Read))
+            foreach (var service in servicesResult.Services)
             {
-                try
+                using (service)
                 {
-                    var readResult = await ch.ReadValueAsync(BluetoothCacheMode.Uncached);
-                    if (readResult.Status == GattCommunicationStatus.Success)
+                    string uuidStr = service.Uuid.ToString();
+                    record.Security.ExposedServices.Add(uuidStr);
+                    Console.WriteLine($"  -> Serviciu GATT: {uuidStr}");
+
+                    // Generic Access (0x1800) -> Device Name (0x2A00)
+                    if (service.Uuid == GattServiceUuids.GenericAccess)
                     {
-                        unauthenticatedReadSuccess = true;
-                        Console.WriteLine($"  -> [!] SUCCES: Citire neautentificata pe caracteristica {ch.Uuid}");
-                        break;
+                        await ReadGenericAccessNameAsync(service, record);
+                    }
+                    // Device Information Service (0x180A) -> Firmware, Hardware, Manufacturer
+                    else if (service.Uuid == GattServiceUuids.DeviceInformation)
+                    {
+                        await ReadDeviceInformationAsync(service, record.Hardware);
+                    }
+                    // ========================================================
+                    // SONDĂ ACTIVĂ WHISPERPAIR: Serviciul Google Fast Pair (0xFE2C)
+                    // ========================================================
+                    else if (uuidStr.Contains("fe2c", StringComparison.OrdinalIgnoreCase))
+                    {
+                        await ProbeFastPairUnauthenticatedReadAsync(service, record);
                     }
                 }
-                catch
-                {
-                    // Ignoram erorile individuale de citire si continuam cu urmatoarea caracteristica.
-                }
             }
-        }
-
-        record.Security.AuditNotes ??= new List<string>();
-        if (unauthenticatedReadSuccess && !record.Security.IsPaired)
-        {
-            record.Security.AuditNotes.Add("CRITIC: Serviciu Fast Pair accesibil fara pairing/bonding. Dispozitivul este un candidat puternic pentru WhisperPair.");
-        }
-        else
-        {
-            record.Security.AuditNotes.Add("INFO: Serviciu Fast Pair prezent, dar accesul este restrictionat sau dispozitivul este deja imperecheat (protejat).");
         }
     }
 
@@ -219,7 +345,6 @@ public static class ActiveGattProber
             return;
 
         Console.WriteLine($"  -> Nume GATT (0x2A00): {gattName}");
-
         if (string.IsNullOrWhiteSpace(record.Name) ||
             string.Equals(record.Name, "(fara nume)", StringComparison.OrdinalIgnoreCase))
         {
@@ -245,6 +370,69 @@ public static class ActiveGattProber
                 hardware.HardwareRevision = value;
             else if (characteristic.Uuid == GattCharacteristicUuids.ManufacturerNameString)
                 hardware.GattManufacturerName = value;
+        }
+    }
+
+    /// <summary>
+    /// SONDĂ ACTIVĂ PENTRU WHISPERPAIR (CVE-2025-36911)
+    /// Testează dacă serviciul Google Fast Pair (0xFE2C) poate fi citit fără pairing/bonding.
+    /// </summary>
+    private static async Task ProbeFastPairUnauthenticatedReadAsync(GattDeviceService fastPairService, BluetoothDeviceRecord record)
+    {
+        Console.WriteLine("  -> [!] Serviciu Google Fast Pair (0xFE2C) detectat. Se testează accesul neautentificat...");
+
+        var charsResult = await fastPairService.GetCharacteristicsAsync(BluetoothCacheMode.Uncached);
+        if (charsResult.Status != GattCommunicationStatus.Success)
+        {
+            Console.WriteLine($"  -> Nu s-au putut enumera caracteristicile: {charsResult.Status}");
+            record.Security.AuditNotes.Add($"Fast Pair: enumerare caracteristici eșuată ({charsResult.Status})");
+            return;
+        }
+
+        bool unauthenticatedReadSuccess = false;
+        string? successfulCharUuid = null;
+
+        foreach (var ch in charsResult.Characteristics)
+        {
+            if (ch.CharacteristicProperties.HasFlag(GattCharacteristicProperties.Read))
+            {
+                try
+                {
+                    var readResult = await ch.ReadValueAsync(BluetoothCacheMode.Uncached);
+                    if (readResult.Status == GattCommunicationStatus.Success)
+                    {
+                        unauthenticatedReadSuccess = true;
+                        successfulCharUuid = ch.Uuid.ToString();
+                        Console.WriteLine($"  -> [!] SUCCES: Citire neautentificată pe caracteristica {ch.Uuid}");
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"  -> Citire eșuată pe {ch.Uuid}: {readResult.Status}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"  -> Excepție la citirea {ch.Uuid}: {ex.Message}");
+                }
+            }
+        }
+
+        if (unauthenticatedReadSuccess && !record.Security.IsPaired)
+        {
+            record.Security.AuditNotes.Add(
+                $"CRITIC: Serviciu Fast Pair accesibil fără pairing pe caracteristica {successfulCharUuid}. " +
+                $"Dispozitivul este un candidat puternic pentru WhisperPair (CVE-2025-36911).");
+        }
+        else if (unauthenticatedReadSuccess && record.Security.IsPaired)
+        {
+            record.Security.AuditNotes.Add(
+                $"INFO: Serviciu Fast Pair accesibil, dar dispozitivul este deja împerecheat (protejat prin bonding).");
+        }
+        else
+        {
+            record.Security.AuditNotes.Add(
+                "INFO: Serviciu Fast Pair prezent, dar toate caracteristicile necesită autentificare.");
         }
     }
 
@@ -461,15 +649,19 @@ public class ReconEngine
             }
         }
 
-        // Verificare specifica pentru Model ID Fast Pair extras din advertising
-        var modelIdUuid = allUuids.FirstOrDefault(u => u.StartsWith("FastPair_ModelID:", StringComparison.OrdinalIgnoreCase));
-        if (modelIdUuid != null &&
-            (string.Equals(rule.Id, "WHISPERPAIR-GFPS", StringComparison.OrdinalIgnoreCase) ||
-             sig.ServiceUuidPrefixes.Any(p => p.StartsWith("FastPair_ModelID:", StringComparison.OrdinalIgnoreCase))))
-        {
-            matched.Add($"Google Fast Pair Model ID detectat: {modelIdUuid}");
-            strongSignal = true;
-        }
+// ============================================================
+// VERIFICARE SPECIFICĂ PENTRU MODEL ID FAST PAIR (Semnal Puternic)
+// Acesta este un semnal mult mai specific decât simplul UUID 0xFE2C
+// ============================================================
+var fastPairModelId = allUuids.FirstOrDefault(u =>
+    u.StartsWith("FastPair_ModelID:", StringComparison.OrdinalIgnoreCase));
+if (fastPairModelId != null &&
+    (string.Equals(rule.Id, "WHISPERPAIR-GFPS", StringComparison.OrdinalIgnoreCase) ||
+     sig.ServiceUuidPrefixes.Any(p => p.StartsWith("FastPair_ModelID:", StringComparison.OrdinalIgnoreCase))))
+{
+    matched.Add($"Google Fast Pair Model ID detectat: {fastPairModelId}");
+    strongSignal = true; // Crește încrederea din Candidat în Probabil
+}
 
         if (sig.CompanyIds.Count > 0)
         {
@@ -876,7 +1068,15 @@ public class DeviceHistoryStore
                 foreach (var kv in loaded)
                 {
                     if (kv.Value != null)
+                    {
+                        // Compatibilitate cu istoricul salvat inainte de introducerea BluetoothTransport.
+                        if (kv.Value.Security?.Transport == BluetoothTransport.Unknown &&
+                            kv.Value.Advertisement != null)
+                        {
+                            kv.Value.Security.Transport = BluetoothTransport.BleAdvertising;
+                        }
                         _records[kv.Key] = kv.Value;
+                    }
                 }
             }
 
@@ -954,7 +1154,8 @@ public class DeviceHistoryStore
                     Name = name ?? string.Empty,
                     Vendor = _lookupStore.ResolveMacVendor(obs.Address, isRandom, companies),
                     FirstSeen = DateTime.UtcNow,
-                    LastScanMode = "Passive"
+                    LastScanMode = "Passive",
+                    Security = new PassiveSecurityInfo { Transport = BluetoothTransport.BleAdvertising }
                 };
                 _records[mac] = record;
             }
@@ -1174,6 +1375,18 @@ using System.Text.Json.Serialization;
 
 namespace BluetoothAuditor;
 
+/// <summary>
+/// Tipul de transport Bluetooth. Distincție critică pentru Dual-Mode devices
+/// (același dispozitiv fizic poate avea adrese diferite pe Classic și BLE).
+/// </summary>
+public enum BluetoothTransport
+{
+    Unknown,
+    BleAdvertising,     // Văzut doar pasiv prin advertising, neconectat
+    BleConnected,       // BLE conectat/împerecheat cu gazda
+    BrEdrClassic        // Bluetooth Classic (BR/EDR) conectat/împerecheat
+}
+
 public class AdvertisementObservation
 {
     public ulong Address { get; set; }
@@ -1195,13 +1408,9 @@ public class PassiveAdvertisementSnapshot
     public int? LastRssi { get; set; }
     public string? AddressKind { get; set; }
     public bool Connectable { get; set; }
-
-    /// <summary>Nume rezolvate din Bluetooth SIG (pentru afisare / cuvinte cheie).</summary>
+    /// <summary>Nume rezolvate din Bluetooth SIG (pentru afișare / cuvinte cheie).</summary>
     public List<string> Companies { get; set; } = new();
-
-    /// <summary>ID-uri brute de companie (pentru potrivirea exacta in reguli).</summary>
     public List<int> CompanyIds { get; set; } = new();
-
     public List<string> ServiceUuids { get; set; } = new();
 }
 
@@ -1227,7 +1436,27 @@ public class PassiveHardwareInfo
 
 public class PassiveSecurityInfo
 {
-    public string ConnectionType { get; set; } = "BLE (doar advertising)";
+    /// <summary>
+    /// Transportul Bluetooth detectat. Înlocuiește șirul liber "BLE (doar advertising)"
+    /// cu o etichetă tipizată pentru a preveni confuziile între Classic și BLE.
+    /// </summary>
+    public BluetoothTransport Transport { get; set; } = BluetoothTransport.Unknown;
+
+    /// <summary>
+    /// Numele human-readable al transportului (folosit la afișare / JSON export).
+    /// </summary>
+    public string ConnectionType
+    {
+        get => Transport switch
+        {
+            BluetoothTransport.BleAdvertising => "BLE (advertising pasiv)",
+            BluetoothTransport.BleConnected => "BLE (conectat/împerecheat)",
+            BluetoothTransport.BrEdrClassic => "BR/EDR (Classic)",
+            _ => "Necunoscut"
+        };
+        set { /* setter gol pentru compatibilitate JSON la deserializare */ }
+    }
+
     public bool IsPaired { get; set; }
     public string? ProtectionLevel { get; set; }
     public string? GattAccess { get; set; }
@@ -1261,6 +1490,8 @@ public class BluetoothDeviceRecord
 ```csharp
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Windows.Devices.Bluetooth;
 using Windows.Devices.Enumeration;
@@ -1271,10 +1502,15 @@ public record ConnectedDeviceInfo(string Name, string Id, string Transport);
 
 public static class ConnectedDeviceChecker
 {
-    private static readonly string[] RequestedProps =
+    // Regex pentru extragerea MAC-ului din DeviceInformation.Id
+    private static readonly Regex MacRegex = new(
+        @"([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}",
+        RegexOptions.Compiled);
+
+    private static readonly string[] RequestedProps = new[]
     {
-        "System.Devices.Aep.IsConnected",
-        "System.Devices.Aep.DeviceAddress"
+        "System.Devices.Aep.ProtocolId",
+        "System.Devices.Aep.IsConnected"
     };
 
     public static async Task<List<ConnectedDeviceInfo>> CheckAndPrintConnectedAsync()
@@ -1283,20 +1519,39 @@ public static class ConnectedDeviceChecker
 
         try
         {
-            var classicDevices = await DeviceInformation.FindAllAsync(
-                BluetoothDevice.GetDeviceSelector(), RequestedProps);
+            // ============================================================
+            // 1. BLUETOOTH CLASSIC (BR/EDR) - dispozitive împerecheate
+            // ============================================================
+            var classicSelector = BluetoothDevice.GetDeviceSelectorFromPairingState(true);
+            var classicDevices = await DeviceInformation.FindAllAsync(classicSelector, RequestedProps);
+
             foreach (var dev in classicDevices)
             {
-                if (IsConnected(dev))
-                    connected.Add(new ConnectedDeviceInfo(DisplayName(dev), dev.Id, "Classic"));
+                if (!IsConnected(dev)) continue;
+                connected.Add(new ConnectedDeviceInfo(
+                    CleanDeviceName(dev.Name),
+                    dev.Id,
+                    "Classic"));
             }
 
-            var bleDevices = await DeviceInformation.FindAllAsync(
-                BluetoothLEDevice.GetDeviceSelector(), RequestedProps);
+            // ============================================================
+            // 2. BLUETOOTH LOW ENERGY (BLE) - dispozitive împerecheate
+            // ============================================================
+            var bleSelector = BluetoothLEDevice.GetDeviceSelectorFromPairingState(true);
+            var bleDevices = await DeviceInformation.FindAllAsync(bleSelector, RequestedProps);
+
             foreach (var dev in bleDevices)
             {
-                if (IsConnected(dev))
-                    connected.Add(new ConnectedDeviceInfo(DisplayName(dev), dev.Id, "BLE"));
+                if (!IsConnected(dev)) continue;
+
+                // Evităm duplicatele: unele dispozitive Dual-Mode apar în ambele liste
+                // cu același DeviceId. Verificăm dacă nu cumva deja există.
+                if (connected.Any(c => c.Id == dev.Id)) continue;
+
+                connected.Add(new ConnectedDeviceInfo(
+                    CleanDeviceName(dev.Name),
+                    dev.Id,
+                    "BLE"));
             }
         }
         catch (Exception ex)
@@ -1313,17 +1568,39 @@ public static class ConnectedDeviceChecker
         {
             Console.WriteLine($"[CONECTAT] Da, exista {connected.Count} dispozitiv(e) conectat(e) la laptop:");
             foreach (var item in connected)
-                Console.WriteLine($"  - [{item.Transport}] {item.Name} ({item.Id})");
+            {
+                // Afișăm explicit transportul pentru claritate
+                string transportTag = item.Transport == "Classic" ? "BR/EDR" : "BLE";
+                Console.WriteLine($" - [{transportTag}] {item.Name} ({item.Id})");
+            }
         }
 
         return connected;
     }
 
-    private static string DisplayName(DeviceInformation dev) =>
-        string.IsNullOrWhiteSpace(dev.Name) ? "(fara nume)" : dev.Name;
+    /// <summary>
+    /// Verifică dacă dispozitivul este în stare conectată folosind proprietatea AEP.
+    /// </summary>
+    private static bool IsConnected(DeviceInformation dev)
+    {
+        if (dev.Properties.TryGetValue("System.Devices.Aep.IsConnected", out var value))
+        {
+            if (value is bool b) return b;
+            if (bool.TryParse(value.ToString(), out bool parsed)) return parsed;
+        }
+        return true;
+    }
 
-    private static bool IsConnected(DeviceInformation dev) =>
-        dev.Properties.TryGetValue("System.Devices.Aep.IsConnected", out var val) && val is true;
+    /// <summary>
+    /// Elimină prefixul "LE-" pe care Windows îl adaugă uneori la dispozitivele Dual-Mode.
+    /// </summary>
+    private static string CleanDeviceName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "(fara nume)";
+        if (name.StartsWith("LE-", StringComparison.OrdinalIgnoreCase))
+            return name[3..];
+        return name;
+    }
 }
 ```
 
@@ -1499,7 +1776,6 @@ public class PassiveDetectionService
         );
 
         var sessionStart = DateTime.UtcNow;
-
         var observations = await CaptureAdvertisementsAsync(options);
         var (persisted, transient) = _historyStore.ApplyPassiveObservations(observations, options.Debug);
         await _historyStore.SaveAsync();
@@ -1507,15 +1783,11 @@ public class PassiveDetectionService
         sw.Stop();
         Console.WriteLine($"[PASIV] Finalizat in {sw.ElapsedMilliseconds} ms | observate: {observations.Count}, persistate: {persisted}, rotative ignorate: {transient}.");
 
-        // Cu scanare: doar dispozitivele vazute in aceasta sesiune.
-        // Cu --no-scan: tot istoricul salvat (triaj offline).
-        // ToUniversalTime() acopera si inregistrarile vechi salvate cu DateTime.Now (Kind=Local).
         bool sessionOnly = options.ScanSeconds > 0;
-
         return _historyStore.AllRecords
             .Where(r => r.Advertisement != null &&
                         (!sessionOnly || r.Advertisement.LastAdvertised.ToUniversalTime() >= sessionStart))
-            .OrderByDescending(r => r.LastRssi ?? short.MinValue)
+            .OrderByDescending(r => r.Advertisement?.LastRssi ?? short.MinValue)
             .ToList();
     }
 
@@ -1529,25 +1801,21 @@ public class PassiveDetectionService
                 Console.WriteLine("[PASIV] Nu exista adaptor Bluetooth; scanarea este sarita.");
                 return false;
             }
-
             if (!adapter.IsLowEnergySupported)
             {
                 Console.WriteLine("[PASIV] Adaptorul nu suporta Bluetooth LE; scanarea este sarita.");
                 return false;
             }
-
             var radio = await adapter.GetRadioAsync();
             if (radio != null && radio.State != RadioState.On)
             {
                 Console.WriteLine($"[PASIV] Radioul Bluetooth nu este pornit (stare: {radio.State}); scanarea este sarita.");
                 return false;
             }
-
             return true;
         }
         catch (Exception ex)
         {
-            // Verificarea in sine a esuat; lasam watcher-ul sa incerce.
             Console.WriteLine($"[PASIV] Nu am putut verifica starea adaptorului: {ex.Message}");
             return true;
         }
@@ -1560,6 +1828,10 @@ public class PassiveDetectionService
 
         if (!await IsBluetoothAvailableAsync())
             return new List<AdvertisementObservation>();
+
+        // Notă tehnică: WinRT nu suportă scanare pasivă BR/EDR (Inquiry/EIR).
+        // Dispozitivele Classic sunt vizibile doar dacă sunt deja împerecheate cu gazda.
+        Console.WriteLine("[INFO] Scanare pasivă BLE (WinRT). BR/EDR Inquiry nu este suportat nativ.");
 
         var seen = new ConcurrentDictionary<ulong, AdvertisementObservation>();
         var watcher = new BluetoothLEAdvertisementWatcher
@@ -1603,22 +1875,29 @@ public class PassiveDetectionService
                 foreach (var uuid in args.Advertisement.ServiceUuids)
                     entry.ServiceUuids.Add(uuid.ToString());
 
+                // ============================================================
+                // PARSARE AVANSATĂ: AD Structure Type 0x16 (Service Data - 16 bit UUID)
+                // ============================================================
                 foreach (var section in args.Advertisement.DataSections)
                 {
                     if (section.DataType != 0x16 || section.Data.Length < 2) continue;
 
                     byte[] raw = section.Data.ToArray();
                     int uuid16 = raw[0] | (raw[1] << 8);
-
-                    // Adaugam UUID-ul standardizat
                     entry.ServiceUuids.Add($"0000{uuid16:x4}-0000-1000-8000-00805f9b34fb");
 
-                    // Extragem Model ID-ul Google Fast Pair (daca este prezent)
+                    // ========================================================
+                    // EXTRAGERE MODEL ID GOOGLE FAST PAIR (WhisperPair)
+                    // Structura: [UUID16 (2 bytes)] [Model ID (3 bytes)] [...]
+                    // ========================================================
                     if (uuid16 == 0xFE2C && raw.Length >= 5)
                     {
-                        // Model ID-ul este stocat pe 3 octeti, little-endian
                         int modelId = raw[2] | (raw[3] << 8) | (raw[4] << 16);
                         entry.ServiceUuids.Add($"FastPair_ModelID:0x{modelId:X6}");
+                        if (options.Debug)
+                        {
+                            Console.WriteLine($"  [DEBUG] Fast Pair Model ID detectat: 0x{modelId:X6} pentru {args.BluetoothAddress:X12}");
+                        }
                     }
                 }
             }
@@ -1726,288 +2005,42 @@ public class Program
             Console.WriteLine($"[RECON] Candidati salvati in: {targetsPath}");
         }
 
-        // 4. Scanare activa GATT (--active-scan)
-        if (opts.ActiveScan)
+// 4. Scanare activa GATT (--active-scan)
+if (opts.ActiveScan)
+{
+    Console.WriteLine("\n[ACTIVE] Pornire sondare GATT...");
+    Console.WriteLine("[INFO] ================================================");
+    Console.WriteLine("[INFO] PENTRU REZULTATE CORECTE, ASIGURĂ-TE CĂ:");
+    Console.WriteLine("[INFO]   1. Ținta BLE NU este conectată la laptop");
+    Console.WriteLine("[INFO]   2. Ținta BLE NU este conectată la alt dispozitiv (telefon)");
+    Console.WriteLine("[INFO]   3. Ținta este în mod discoverable/pairing (dacă e necesar)");
+    Console.WriteLine("[INFO]   4. Ținta este în raza de acoperire (RSSI > -70 dBm ideal)");
+    Console.WriteLine("[INFO] ================================================\n");
+
+    var activeCandidates = filteredDevices
+        .Where(d => d.Advertisement?.Connectable == true)
+        .ToList();
+
+    if (activeCandidates.Count == 0)
+    {
+        Console.WriteLine("[ACTIVE] Nicio tinta conectabila gasita pentru sondare GATT.");
+    }
+    else
+    {
+        foreach (var device in activeCandidates)
         {
-            Console.WriteLine("\n[ACTIVE] Pornire sondare GATT...");
+            Console.WriteLine($"\n[ACTIVE] Sondare {device.MacAddress} ({device.Name})...");
+            Console.WriteLine($"  Transport: {device.Security?.ConnectionType ?? "N/A"}");
+            Console.WriteLine($"  RSSI: {device.Advertisement?.LastRssi ?? 0} dBm | AddressKind: {device.Advertisement?.AddressKind}");
 
-            var activeCandidates = filteredDevices
-                .Where(d => d.Advertisement?.Connectable == true)
-                .ToList();
-
-            if (activeCandidates.Count == 0)
-            {
-                Console.WriteLine("[ACTIVE] Nicio tinta conectabila gasita pentru sondare GATT.");
-            }
-            else
-            {
-                foreach (var device in activeCandidates)
-                {
-                    Console.WriteLine($"[ACTIVE] Sondare {device.MacAddress} ({device.Name})...");
-                    await ActiveGattProber.ProbeAsync(device);
-                    device.LastScanMode = "Active";
-                }
-
-                await historyStore.SaveAsync();
-                Console.WriteLine("[ACTIVE] Sondare GATT finalizata. Istoricul devices_db.json a fost actualizat.");
-            }
+            await ActiveGattProber.ProbeAsync(device, timeoutSeconds: 15, maxRetries: 3);
+            device.LastScanMode = "Active";
         }
+
+        await historyStore.SaveAsync();
+        Console.WriteLine("\n[ACTIVE] Sondare GATT finalizata. Istoricul devices_db.json a fost actualizat.");
+    }
+}
     }
 }
 ```
-
-## Testare aplicatie (OUTPUT)
-
-```text
-D:\GoCrazy\Licenta\Lectura\alpha01>dotnet build
-Restore complete (0.6s)
-  alpha0.1 net10.0-windows10.0.19041.0 succeeded (3.0s) → bin\Debug\net10.0-windows10.0.19041.0\alpha0.1.dll
-
-Build succeeded in 3.9s
-
-D:\GoCrazy\Licenta\Lectura\alpha01>dotnet run -- --help
-Utilizare:
-  dotnet run -- [optiuni]
-
-Optiuni disponibile:
-  --help, -h               Afiseaza acest mesaj de ajutor si iese.
-  --scan=<secunde>         Durata scanarii pasive BLE (implicit: 8 secunde).
-  --no-scan                Sare peste scanarea BLE (analizeaza doar istoricul din devices_db.json).
-  --target=<MAC|Nume>      Filtreaza si analizeaza doar o tinta anume (dupa MAC sau nume).
-  --connect[=<filtru>]     Ruleaza triajul pasiv (ReconEngine) si salveaza candidații in recon_targets.json.
-  --active-scan            Ruleaza sondarea activa GATT (enumera serviciile, citeste 0x180A si testeaza 0xFE2C) pe tintele conectabile.
-  --debug                  Afiseaza detalii suplimentare in timpul scanarii si filtrarii.
-
-Optiuni rezervate (parsate, dar inca nefolosite):
-  --fast, --no-prompt, --timeout=<sec>, --enum-timeout=<sec>
-
-Exemple:
-  dotnet run -- --help
-  dotnet run -- --scan=10 --debug
-  dotnet run -- --no-scan --connect=2CE2AD64
-  dotnet run -- --scan=6 --connect=2CE2AD64 --active-scan
-  dotnet run -- --no-scan --connect=D1D32CE2AD64 --active-scan
-  dotnet run -- --no-scan --target=D1D32CE2AD64 --active-scan
-
-D:\GoCrazy\Licenta\Lectura\alpha01>dotnet run -- --scan --debug
-[CONECTAT] Da, exista 1 dispozitiv(e) conectat(e) la laptop:
-  - [Classic] Philips TAT3509 (Bluetooth#Bluetooth38:d5:7a:be:fc:58-18:9c:2c:e2:ad:64)
-[LOOKUP] Bluetooth SIG incarcat: 4071 companii.
-[LOOKUP] OUI incarcat: 40765 prefixe.
-[DB] Istoric incarcat: 22 dispozitive.
-[PASIV] (fara nume) (E38A2CE2AD64) | -45 dBm | Random-Static
-[PASIV] LE-Philips TAT3509 (189C2C39063D) | -56 dBm | Public
-[PASIV-SKIP] (fara nume) (3B8490FB68FC) | -60 dBm | Random-NonResolvable
-[PASIV-SKIP] (fara nume) (0DCEF9A2E9B5) | -62 dBm | Random-NonResolvable
-[PASIV-SKIP] (fara nume) (13B6A90098E5) | -62 dBm | Random-NonResolvable
-[PASIV-SKIP] (fara nume) (38355D4D330C) | -63 dBm | Random-NonResolvable
-[PASIV-SKIP] (fara nume) (7FC7B8057C4A) | -64 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (6A21FDFC6F1D) | -64 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (7AA2FF38BC95) | -64 dBm | Random-Resolvable(RPA)
-[PASIV] (fara nume) (D7041166F80E) | -65 dBm | Random-Static
-[PASIV-SKIP] (fara nume) (2B0E5D377F78) | -65 dBm | Random-NonResolvable
-[PASIV-SKIP] (fara nume) (38526FEF8B3C) | -68 dBm | Random-NonResolvable
-[PASIV] (fara nume) (DD8CFD5D63F5) | -68 dBm | Random-Static
-[PASIV-SKIP] (fara nume) (6736C21968AC) | -69 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (69916F294C20) | -70 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (77BE98A79C7F) | -70 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (6C7EE5F1053E) | -71 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (3AB7F6D1BA6F) | -71 dBm | Random-NonResolvable
-[PASIV-SKIP] (fara nume) (2CF2C1AE65DC) | -72 dBm | Random-NonResolvable
-[PASIV-SKIP] (fara nume) (700B66CB9F84) | -72 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (38247605B57D) | -73 dBm | Random-NonResolvable
-[PASIV-SKIP] (fara nume) (433B257EA471) | -73 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (7C005AE89480) | -73 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (2F1012A54D0E) | -74 dBm | Random-NonResolvable
-[PASIV-SKIP] (fara nume) (0F0AFF500A62) | -74 dBm | Random-NonResolvable
-[PASIV] (fara nume) (FC98A12D9C59) | -75 dBm | Random-Static
-[PASIV-SKIP] (fara nume) (5A17DE4F1F3F) | -75 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (2D9A7C8E0A5F) | -76 dBm | Random-NonResolvable
-[PASIV-SKIP] (fara nume) (7F5C2B493039) | -76 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (7CF7B8D3C26F) | -76 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (63547807FE1D) | -77 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (77F846C5BE6D) | -77 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (45A0E5FBD662) | -78 dBm | Random-Resolvable(RPA)
-[PASIV] (fara nume) (D509E73A6C5C) | -78 dBm | Random-Static
-[PASIV] (fara nume) (EA5678951669) | -78 dBm | Random-Static
-[PASIV] (fara nume) (CDA34104E95D) | -79 dBm | Random-Static
-[PASIV-SKIP] (fara nume) (49FA7BB5C012) | -81 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (075A3C3DE70C) | -81 dBm | Random-NonResolvable
-[PASIV-SKIP] (fara nume) (0FEC4F3D4312) | -82 dBm | Random-NonResolvable
-[PASIV-SKIP] (fara nume) (044E1C49860B) | -82 dBm | Random-NonResolvable
-[PASIV-SKIP] (fara nume) (0690F505E097) | -83 dBm | Random-NonResolvable
-[PASIV-SKIP] Meta Quest 2 (6A83FF7C1111) | -85 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (778DF3F41C03) | -85 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (0FC89D124F75) | -85 dBm | Random-NonResolvable
-[PASIV-SKIP] (fara nume) (33AF5907F921) | -86 dBm | Random-NonResolvable
-[PASIV-SKIP] (fara nume) (286EF460E9C1) | -86 dBm | Random-NonResolvable
-[PASIV] (fara nume) (FFFF202654E0) | -86 dBm | Public
-[PASIV-SKIP] (fara nume) (5B620A193295) | -88 dBm | Random-Resolvable(RPA)
-[PASIV] (fara nume) (D0D00326C10D) | -89 dBm | Public
-[PASIV-SKIP] (fara nume) (4024802F8939) | -89 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (5FD56CC3AE66) | -89 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (100C4764B045) | -90 dBm | Random-NonResolvable
-[PASIV] (fara nume) (C039370F72F7) | -91 dBm | Public
-[PASIV-SKIP] (fara nume) (70DC4F8EE6C4) | -91 dBm | Random-Resolvable(RPA)
-[PASIV] (fara nume) (D0D0032694A3) | -91 dBm | Public
-[PASIV-SKIP] (fara nume) (3D322954326D) | -92 dBm | Random-NonResolvable
-[PASIV-SKIP] (fara nume) (0A292F34A9DC) | -92 dBm | Random-NonResolvable
-[PASIV-SKIP] (fara nume) (50491A137084) | -93 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (0E0DE567E8A3) | -93 dBm | Random-NonResolvable
-[PASIV-SKIP] (fara nume) (4773861C65B2) | -93 dBm | Random-Resolvable(RPA)
-[PASIV] (fara nume) (0CE4A032E41C) | -93 dBm | Public
-[PASIV-SKIP] (fara nume) (6A38A08C8DA7) | -95 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (4C238687C0E7) | -95 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (572000DEEA4D) | -95 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (78351C056EEA) | -96 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (040E10454EA5) | -96 dBm | Random-NonResolvable
-[PASIV-SKIP] (fara nume) (41E2D45DCDD3) | -96 dBm | Random-Resolvable(RPA)
-[PASIV-SKIP] (fara nume) (0A3FF3B12206) | -96 dBm | Random-NonResolvable
-[DB] Salvat in D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\devices_db.json
-[PASIV] Finalizat in 8160 ms | observate: 68, persistate: 13, rotative ignorate: 55.
-[REZULTAT] Dispozitive in sesiune: 13 (afisate/analizate: 13)
-
-D:\GoCrazy\Licenta\Lectura\alpha01>dotnet run -- --no-scan --connect="189C2C39063D" --active-scan
-[CONECTAT] Da, exista 1 dispozitiv(e) conectat(e) la laptop:
-  - [Classic] Philips TAT3509 (Bluetooth#Bluetooth38:d5:7a:be:fc:58-18:9c:2c:e2:ad:64)
-[LOOKUP] Bluetooth SIG incarcat: 4071 companii.
-[LOOKUP] OUI incarcat: 40765 prefixe.
-[DB] Istoric incarcat: 33 dispozitive.
-[DB] Salvat in D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\devices_db.json
-[PASIV] Finalizat in 85 ms | observate: 0, persistate: 0, rotative ignorate: 0.
-[REZULTAT] Dispozitive din istoric (--no-scan): 33 (afisate/analizate: 1)
-[RECON] Reguli incarcate: 9 din vulnerabilities.json
-
-=================================================================
- REZULTAT TRIAJ PASIV (RECON): 0 candidati din 1 dispozitive
-=================================================================
-Niciun dispozitiv nu a declansat regulile din vulnerabilities.json.
-[RECON] Candidati salvati in: D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\recon_targets.json
-
-[ACTIVE] Pornire sondare GATT...
-[ACTIVE] Sondare 189C2C39063D (LE-Philips TAT3509)...
-  -> Serviciu GATT: 00001800-0000-1000-8000-00805f9b34fb
-  -> Nume GATT (0x2A00): LE-Philips TAT3509
-  -> Serviciu GATT: 0000ae00-0000-1000-8000-00805f9b34fb
-  -> Serviciu GATT: 80727376-7380-8372-6965-688072797869
-[DB] Salvat in D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\devices_db.json
-[ACTIVE] Sondare GATT finalizata. Istoricul devices_db.json a fost actualizat.
-
-D:\GoCrazy\Licenta\Lectura\alpha01>dotnet run -- --no-scan --target="2C39063D" --active-scan
-[CONECTAT] Da, exista 1 dispozitiv(e) conectat(e) la laptop:
-  - [Classic] Philips TAT3509 (Bluetooth#Bluetooth38:d5:7a:be:fc:58-18:9c:2c:e2:ad:64)
-[LOOKUP] Bluetooth SIG incarcat: 4071 companii.
-[LOOKUP] OUI incarcat: 40765 prefixe.
-[DB] Istoric incarcat: 33 dispozitive.
-[DB] Salvat in D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\devices_db.json
-[PASIV] Finalizat in 82 ms | observate: 0, persistate: 0, rotative ignorate: 0.
-[REZULTAT] Dispozitive din istoric (--no-scan): 33 (afisate/analizate: 1)
-[RECON] Reguli incarcate: 9 din vulnerabilities.json
-
-=================================================================
- REZULTAT TRIAJ PASIV (RECON): 1 candidati din 1 dispozitive
-=================================================================
-[TARGET] LE-Philips TAT3509 (189C2C39063D) | BLE (doar advertising) | RSSI: -56 dBm
-   -> [Probabil] Unauthenticated GATT Exposure or Weak Pairing Protection (CWE-287 / CWE-306)
-      Semnale: GATT accesibil (Success) fara pairing/bonding
-      Pas activ: Enumerare caracteristici GATT cu proprietati Read/Write fara criptare sau downgrade Just Works.
-=================================================================
-[RECON] Candidati salvati in: D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\recon_targets.json
-
-[ACTIVE] Pornire sondare GATT...
-[ACTIVE] Sondare 189C2C39063D (LE-Philips TAT3509)...
-  -> Serviciu GATT: 00001800-0000-1000-8000-00805f9b34fb
-  -> Nume GATT (0x2A00): LE-Philips TAT3509
-  -> Serviciu GATT: 0000ae00-0000-1000-8000-00805f9b34fb
-  -> Serviciu GATT: 80727376-7380-8372-6965-688072797869
-[DB] Salvat in D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\devices_db.json
-[ACTIVE] Sondare GATT finalizata. Istoricul devices_db.json a fost actualizat.
-
-D:\GoCrazy\Licenta\Lectura\alpha01>dotnet run -- --no-scan --target=2CE2AD64 --active-scan
-[CONECTAT] Da, exista 1 dispozitiv(e) conectat(e) la laptop:
-  - [Classic] Philips TAT3509 (Bluetooth#Bluetooth38:d5:7a:be:fc:58-18:9c:2c:e2:ad:64)
-[LOOKUP] Bluetooth SIG incarcat: 4071 companii.
-[LOOKUP] OUI incarcat: 40765 prefixe.
-[DB] Istoric incarcat: 33 dispozitive.
-[DB] Salvat in D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\devices_db.json
-[PASIV] Finalizat in 83 ms | observate: 0, persistate: 0, rotative ignorate: 0.
-[REZULTAT] Dispozitive din istoric (--no-scan): 33 (afisate/analizate: 2)
-[RECON] Reguli incarcate: 9 din vulnerabilities.json
-
-=================================================================
- REZULTAT TRIAJ PASIV (RECON): 2 candidati din 2 dispozitive
-=================================================================
-[TARGET] Philips TAT3509(BLE) (CD9D2CE2AD64) | BLE (doar advertising) | RSSI: -54 dBm
-   -> [Probabil] Unauthenticated GATT Exposure or Weak Pairing Protection (CWE-287 / CWE-306)
-      Semnale: GATT accesibil (Success) fara pairing/bonding
-      Pas activ: Enumerare caracteristici GATT cu proprietati Read/Write fara criptare sau downgrade Just Works.
-   -> [Candidat] WhisperPair (Google Fast Pair Pairing-State Bypass) (CVE-2025-36911)
-      Semnale: Service UUID: 0000fe2c-0000-1000-8000-00805f9b34fb
-      Pas activ: Sondă activă GATT: Tentativă de citire a caracteristicilor din serviciul 0xFE2C fără ca dispozitivul să fie în mod de pairing. Succesul indică lipsa validării stării.
-[TARGET] (fara nume) (E38A2CE2AD64) | BLE (doar advertising) | RSSI: -45 dBm
-   -> [Candidat] WhisperPair (Google Fast Pair Pairing-State Bypass) (CVE-2025-36911)
-      Semnale: Service UUID: 0000fe2c-0000-1000-8000-00805f9b34fb; Service UUID: FastPair_ModelID:0x1D4000; Google Fast Pair Model ID detectat: FastPair_ModelID:0x1D4000
-      Pas activ: Sondă activă GATT: Tentativă de citire a caracteristicilor din serviciul 0xFE2C fără ca dispozitivul să fie în mod de pairing. Succesul indică lipsa validării stării.
-=================================================================
-[RECON] Candidati salvati in: D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\recon_targets.json
-
-[ACTIVE] Pornire sondare GATT...
-[ACTIVE] Sondare E38A2CE2AD64 ()...
-  -> Acces GATT esuat: Unreachable
-[ACTIVE] Sondare CD9D2CE2AD64 (Philips TAT3509(BLE))...
-  -> Acces GATT esuat: Unreachable
-[DB] Salvat in D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\devices_db.json
-[ACTIVE] Sondare GATT finalizata. Istoricul devices_db.json a fost actualizat.
-
-D:\GoCrazy\Licenta\Lectura\alpha01>dotnet run -- --scan --active-scan
-[CONECTAT] Da, exista 1 dispozitiv(e) conectat(e) la laptop:
-  - [Classic] Philips TAT3509 (Bluetooth#Bluetooth38:d5:7a:be:fc:58-18:9c:2c:e2:ad:64)
-[LOOKUP] Bluetooth SIG incarcat: 4071 companii.
-[LOOKUP] OUI incarcat: 40765 prefixe.
-[DB] Istoric incarcat: 33 dispozitive.
-[DB] Salvat in D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\devices_db.json
-[PASIV] Finalizat in 8127 ms | observate: 56, persistate: 14, rotative ignorate: 42.
-[REZULTAT] Dispozitive in sesiune: 14 (afisate/analizate: 14)
-
-[ACTIVE] Pornire sondare GATT...
-[ACTIVE] Sondare CF9C2CE2AD64 (LE-Philips TAT3509)...
-  -> Serviciu GATT: 00001800-0000-1000-8000-00805f9b34fb
-  -> Nume GATT (0x2A00): Philips TAT3509(BLE)
-  -> Serviciu GATT: 0000fe2c-0000-1000-8000-00805f9b34fb
-  -> [!] Serviciu Google Fast Pair (0xFE2C) detectat. Se testeaza accesul neautentificat...
-  -> [!] SUCCES: Citire neautentificata pe caracteristica fe2c1233-8366-4814-8eb0-01de32100bea
-[ACTIVE] Sondare 54D9C67C47F7 ()...
-  -> Serviciu GATT: 00001800-0000-1000-8000-00805f9b34fb
-  -> Nume GATT (0x2A00): HUAWEI FreeBuds SE 2
-  -> Serviciu GATT: 00001801-0000-1000-8000-00805f9b34fb
-  -> Serviciu GATT: 00007033-0000-1000-8000-00805f9b34fb
-  -> Serviciu GATT: 01000100-0000-1000-8000-009e78563412
-[ACTIVE] Sondare CB975F0B2627 ()...
-  -> Acces GATT esuat: Unreachable
-[ACTIVE] Sondare D0D00326C10D ([TV] Blue1)...
-  -> Acces GATT esuat: Unreachable
-[ACTIVE] Sondare C039370F72F7 (GR-AC_10001_09_72f7_SC)...
-  -> Acces GATT esuat: Unreachable
-[ACTIVE] Sondare 0CE4A032E41C (HUAWEI WATCH GT 2e-41C)...
-  -> Serviciu GATT: 00001800-0000-1000-8000-00805f9b34fb
-  -> Nume GATT (0x2A00): HUAWEI WATCH GT 2e-41C
-  -> Serviciu GATT: 00001801-0000-1000-8000-00805f9b34fb
-  -> Serviciu GATT: 00003802-0000-1000-8000-00805f9b34fb
-  -> Serviciu GATT: 0000180f-0000-1000-8000-00805f9b34fb
-  -> Serviciu GATT: 0000fe86-0000-1000-8000-00805f9b34fb
-  -> Serviciu GATT: 00001812-0000-1000-8000-00805f9b34fb
-[DB] Salvat in D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\devices_db.json
-[ACTIVE] Sondare GATT finalizata. Istoricul devices_db.json a fost actualizat.
-```
-
-### Observații din output
-
-- Buildul reușește (`alpha0.1 net10.0-windows10.0.19041.0`), iar helpul reflectă exact opțiunile noi, inclusiv `--target` și testarea serviciului `0xFE2C`.
-- Scanarea pasivă cu `--scan --debug`: 68 de advertising-uri văzute, 13 adrese stabile persistate, 55 de adrese rotative (RPA/NRPA) ignorate.
-- `--connect="189C2C39063D"` a rulat triajul, dar a raportat **0 candidați**, deoarece `GattAccess` nu era încă populat în acel moment; după sondarea activă, valoarea `Success` a fost salvată în `devices_db.json`.
-- `--target="2C39063D"` confirmă fixul: filtrează, pornește `ReconEngine` și găsește candidatul `WEAK-PAIRING-OR-OPEN-GATT`, afișat ca „Unauthenticated GATT Exposure or Weak Pairing Protection (CWE-287 / CWE-306)”.
-- `--target=2CE2AD64` găsește două dispozitive cu UUID Fast Pair; pe `E38A2CE2AD64` apare și `FastPair_ModelID:0x1D4000`, deci regula `WHISPERPAIR-GFPS` prinde atât UUID-ul, cât și Model ID-ul.
-- În runul final, `dotnet run -- --scan --active-scan` detectează serviciul `0000fe2c-...` pe Philips TAT3509 și **citește cu succes o caracteristică fără pairing** (`fe2c1233-8366-4814-8eb0-01de32100bea`) — confirmare activă pentru WhisperPair.
-- Țintele `Unreachable` apar din istoricul `--no-scan` (dispozitive salvate anterior, dar nu mai sunt în rază).
-
-> Posibilă îmbunătățire de analizat: ordinea curentă e `ReconEngine` → sondare activă, deci triajul nu poate folosi `GattAccess` proaspăt în același run. Mutarea sau duplicarea triajului după `--active-scan` ar elimina dependența de datele salvage din rularea anterioară.

@@ -53,31 +53,41 @@ public class Program
             Console.WriteLine($"[RECON] Candidati salvati in: {targetsPath}");
         }
 
-        // 4. Scanare activa GATT (--active-scan)
-        if (opts.ActiveScan)
+// 4. Scanare activa GATT (--active-scan)
+if (opts.ActiveScan)
+{
+    Console.WriteLine("\n[ACTIVE] Pornire sondare GATT...");
+    Console.WriteLine("[INFO] ================================================");
+    Console.WriteLine("[INFO] PENTRU REZULTATE CORECTE, ASIGURĂ-TE CĂ:");
+    Console.WriteLine("[INFO]   1. Ținta BLE NU este conectată la laptop");
+    Console.WriteLine("[INFO]   2. Ținta BLE NU este conectată la alt dispozitiv (telefon)");
+    Console.WriteLine("[INFO]   3. Ținta este în mod discoverable/pairing (dacă e necesar)");
+    Console.WriteLine("[INFO]   4. Ținta este în raza de acoperire (RSSI > -70 dBm ideal)");
+    Console.WriteLine("[INFO] ================================================\n");
+
+    var activeCandidates = filteredDevices
+        .Where(d => d.Advertisement?.Connectable == true)
+        .ToList();
+
+    if (activeCandidates.Count == 0)
+    {
+        Console.WriteLine("[ACTIVE] Nicio tinta conectabila gasita pentru sondare GATT.");
+    }
+    else
+    {
+        foreach (var device in activeCandidates)
         {
-            Console.WriteLine("\n[ACTIVE] Pornire sondare GATT...");
+            Console.WriteLine($"\n[ACTIVE] Sondare {device.MacAddress} ({device.Name})...");
+            Console.WriteLine($"  Transport: {device.Security?.ConnectionType ?? "N/A"}");
+            Console.WriteLine($"  RSSI: {device.Advertisement?.LastRssi ?? 0} dBm | AddressKind: {device.Advertisement?.AddressKind}");
 
-            var activeCandidates = filteredDevices
-                .Where(d => d.Advertisement?.Connectable == true)
-                .ToList();
-
-            if (activeCandidates.Count == 0)
-            {
-                Console.WriteLine("[ACTIVE] Nicio tinta conectabila gasita pentru sondare GATT.");
-            }
-            else
-            {
-                foreach (var device in activeCandidates)
-                {
-                    Console.WriteLine($"[ACTIVE] Sondare {device.MacAddress} ({device.Name})...");
-                    await ActiveGattProber.ProbeAsync(device);
-                    device.LastScanMode = "Active";
-                }
-
-                await historyStore.SaveAsync();
-                Console.WriteLine("[ACTIVE] Sondare GATT finalizata. Istoricul devices_db.json a fost actualizat.");
-            }
+            await ActiveGattProber.ProbeAsync(device, timeoutSeconds: 15, maxRetries: 3);
+            device.LastScanMode = "Active";
         }
+
+        await historyStore.SaveAsync();
+        Console.WriteLine("\n[ACTIVE] Sondare GATT finalizata. Istoricul devices_db.json a fost actualizat.");
+    }
+}
     }
 }
