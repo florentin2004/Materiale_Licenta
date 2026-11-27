@@ -1755,3 +1755,259 @@ public class Program
     }
 }
 ```
+
+## Testare aplicatie (OUTPUT)
+
+```text
+D:\GoCrazy\Licenta\Lectura\alpha01>dotnet build
+Restore complete (0.6s)
+  alpha0.1 net10.0-windows10.0.19041.0 succeeded (3.0s) → bin\Debug\net10.0-windows10.0.19041.0\alpha0.1.dll
+
+Build succeeded in 3.9s
+
+D:\GoCrazy\Licenta\Lectura\alpha01>dotnet run -- --help
+Utilizare:
+  dotnet run -- [optiuni]
+
+Optiuni disponibile:
+  --help, -h               Afiseaza acest mesaj de ajutor si iese.
+  --scan=<secunde>         Durata scanarii pasive BLE (implicit: 8 secunde).
+  --no-scan                Sare peste scanarea BLE (analizeaza doar istoricul din devices_db.json).
+  --target=<MAC|Nume>      Filtreaza si analizeaza doar o tinta anume (dupa MAC sau nume).
+  --connect[=<filtru>]     Ruleaza triajul pasiv (ReconEngine) si salveaza candidații in recon_targets.json.
+  --active-scan            Ruleaza sondarea activa GATT (enumera serviciile, citeste 0x180A si testeaza 0xFE2C) pe tintele conectabile.
+  --debug                  Afiseaza detalii suplimentare in timpul scanarii si filtrarii.
+
+Optiuni rezervate (parsate, dar inca nefolosite):
+  --fast, --no-prompt, --timeout=<sec>, --enum-timeout=<sec>
+
+Exemple:
+  dotnet run -- --help
+  dotnet run -- --scan=10 --debug
+  dotnet run -- --no-scan --connect=2CE2AD64
+  dotnet run -- --scan=6 --connect=2CE2AD64 --active-scan
+  dotnet run -- --no-scan --connect=D1D32CE2AD64 --active-scan
+  dotnet run -- --no-scan --target=D1D32CE2AD64 --active-scan
+
+D:\GoCrazy\Licenta\Lectura\alpha01>dotnet run -- --scan --debug
+[CONECTAT] Da, exista 1 dispozitiv(e) conectat(e) la laptop:
+  - [Classic] Philips TAT3509 (Bluetooth#Bluetooth38:d5:7a:be:fc:58-18:9c:2c:e2:ad:64)
+[LOOKUP] Bluetooth SIG incarcat: 4071 companii.
+[LOOKUP] OUI incarcat: 40765 prefixe.
+[DB] Istoric incarcat: 22 dispozitive.
+[PASIV] (fara nume) (E38A2CE2AD64) | -45 dBm | Random-Static
+[PASIV] LE-Philips TAT3509 (189C2C39063D) | -56 dBm | Public
+[PASIV-SKIP] (fara nume) (3B8490FB68FC) | -60 dBm | Random-NonResolvable
+[PASIV-SKIP] (fara nume) (0DCEF9A2E9B5) | -62 dBm | Random-NonResolvable
+[PASIV-SKIP] (fara nume) (13B6A90098E5) | -62 dBm | Random-NonResolvable
+[PASIV-SKIP] (fara nume) (38355D4D330C) | -63 dBm | Random-NonResolvable
+[PASIV-SKIP] (fara nume) (7FC7B8057C4A) | -64 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (6A21FDFC6F1D) | -64 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (7AA2FF38BC95) | -64 dBm | Random-Resolvable(RPA)
+[PASIV] (fara nume) (D7041166F80E) | -65 dBm | Random-Static
+[PASIV-SKIP] (fara nume) (2B0E5D377F78) | -65 dBm | Random-NonResolvable
+[PASIV-SKIP] (fara nume) (38526FEF8B3C) | -68 dBm | Random-NonResolvable
+[PASIV] (fara nume) (DD8CFD5D63F5) | -68 dBm | Random-Static
+[PASIV-SKIP] (fara nume) (6736C21968AC) | -69 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (69916F294C20) | -70 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (77BE98A79C7F) | -70 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (6C7EE5F1053E) | -71 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (3AB7F6D1BA6F) | -71 dBm | Random-NonResolvable
+[PASIV-SKIP] (fara nume) (2CF2C1AE65DC) | -72 dBm | Random-NonResolvable
+[PASIV-SKIP] (fara nume) (700B66CB9F84) | -72 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (38247605B57D) | -73 dBm | Random-NonResolvable
+[PASIV-SKIP] (fara nume) (433B257EA471) | -73 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (7C005AE89480) | -73 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (2F1012A54D0E) | -74 dBm | Random-NonResolvable
+[PASIV-SKIP] (fara nume) (0F0AFF500A62) | -74 dBm | Random-NonResolvable
+[PASIV] (fara nume) (FC98A12D9C59) | -75 dBm | Random-Static
+[PASIV-SKIP] (fara nume) (5A17DE4F1F3F) | -75 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (2D9A7C8E0A5F) | -76 dBm | Random-NonResolvable
+[PASIV-SKIP] (fara nume) (7F5C2B493039) | -76 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (7CF7B8D3C26F) | -76 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (63547807FE1D) | -77 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (77F846C5BE6D) | -77 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (45A0E5FBD662) | -78 dBm | Random-Resolvable(RPA)
+[PASIV] (fara nume) (D509E73A6C5C) | -78 dBm | Random-Static
+[PASIV] (fara nume) (EA5678951669) | -78 dBm | Random-Static
+[PASIV] (fara nume) (CDA34104E95D) | -79 dBm | Random-Static
+[PASIV-SKIP] (fara nume) (49FA7BB5C012) | -81 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (075A3C3DE70C) | -81 dBm | Random-NonResolvable
+[PASIV-SKIP] (fara nume) (0FEC4F3D4312) | -82 dBm | Random-NonResolvable
+[PASIV-SKIP] (fara nume) (044E1C49860B) | -82 dBm | Random-NonResolvable
+[PASIV-SKIP] (fara nume) (0690F505E097) | -83 dBm | Random-NonResolvable
+[PASIV-SKIP] Meta Quest 2 (6A83FF7C1111) | -85 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (778DF3F41C03) | -85 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (0FC89D124F75) | -85 dBm | Random-NonResolvable
+[PASIV-SKIP] (fara nume) (33AF5907F921) | -86 dBm | Random-NonResolvable
+[PASIV-SKIP] (fara nume) (286EF460E9C1) | -86 dBm | Random-NonResolvable
+[PASIV] (fara nume) (FFFF202654E0) | -86 dBm | Public
+[PASIV-SKIP] (fara nume) (5B620A193295) | -88 dBm | Random-Resolvable(RPA)
+[PASIV] (fara nume) (D0D00326C10D) | -89 dBm | Public
+[PASIV-SKIP] (fara nume) (4024802F8939) | -89 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (5FD56CC3AE66) | -89 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (100C4764B045) | -90 dBm | Random-NonResolvable
+[PASIV] (fara nume) (C039370F72F7) | -91 dBm | Public
+[PASIV-SKIP] (fara nume) (70DC4F8EE6C4) | -91 dBm | Random-Resolvable(RPA)
+[PASIV] (fara nume) (D0D0032694A3) | -91 dBm | Public
+[PASIV-SKIP] (fara nume) (3D322954326D) | -92 dBm | Random-NonResolvable
+[PASIV-SKIP] (fara nume) (0A292F34A9DC) | -92 dBm | Random-NonResolvable
+[PASIV-SKIP] (fara nume) (50491A137084) | -93 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (0E0DE567E8A3) | -93 dBm | Random-NonResolvable
+[PASIV-SKIP] (fara nume) (4773861C65B2) | -93 dBm | Random-Resolvable(RPA)
+[PASIV] (fara nume) (0CE4A032E41C) | -93 dBm | Public
+[PASIV-SKIP] (fara nume) (6A38A08C8DA7) | -95 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (4C238687C0E7) | -95 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (572000DEEA4D) | -95 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (78351C056EEA) | -96 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (040E10454EA5) | -96 dBm | Random-NonResolvable
+[PASIV-SKIP] (fara nume) (41E2D45DCDD3) | -96 dBm | Random-Resolvable(RPA)
+[PASIV-SKIP] (fara nume) (0A3FF3B12206) | -96 dBm | Random-NonResolvable
+[DB] Salvat in D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\devices_db.json
+[PASIV] Finalizat in 8160 ms | observate: 68, persistate: 13, rotative ignorate: 55.
+[REZULTAT] Dispozitive in sesiune: 13 (afisate/analizate: 13)
+
+D:\GoCrazy\Licenta\Lectura\alpha01>dotnet run -- --no-scan --connect="189C2C39063D" --active-scan
+[CONECTAT] Da, exista 1 dispozitiv(e) conectat(e) la laptop:
+  - [Classic] Philips TAT3509 (Bluetooth#Bluetooth38:d5:7a:be:fc:58-18:9c:2c:e2:ad:64)
+[LOOKUP] Bluetooth SIG incarcat: 4071 companii.
+[LOOKUP] OUI incarcat: 40765 prefixe.
+[DB] Istoric incarcat: 33 dispozitive.
+[DB] Salvat in D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\devices_db.json
+[PASIV] Finalizat in 85 ms | observate: 0, persistate: 0, rotative ignorate: 0.
+[REZULTAT] Dispozitive din istoric (--no-scan): 33 (afisate/analizate: 1)
+[RECON] Reguli incarcate: 9 din vulnerabilities.json
+
+=================================================================
+ REZULTAT TRIAJ PASIV (RECON): 0 candidati din 1 dispozitive
+=================================================================
+Niciun dispozitiv nu a declansat regulile din vulnerabilities.json.
+[RECON] Candidati salvati in: D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\recon_targets.json
+
+[ACTIVE] Pornire sondare GATT...
+[ACTIVE] Sondare 189C2C39063D (LE-Philips TAT3509)...
+  -> Serviciu GATT: 00001800-0000-1000-8000-00805f9b34fb
+  -> Nume GATT (0x2A00): LE-Philips TAT3509
+  -> Serviciu GATT: 0000ae00-0000-1000-8000-00805f9b34fb
+  -> Serviciu GATT: 80727376-7380-8372-6965-688072797869
+[DB] Salvat in D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\devices_db.json
+[ACTIVE] Sondare GATT finalizata. Istoricul devices_db.json a fost actualizat.
+
+D:\GoCrazy\Licenta\Lectura\alpha01>dotnet run -- --no-scan --target="2C39063D" --active-scan
+[CONECTAT] Da, exista 1 dispozitiv(e) conectat(e) la laptop:
+  - [Classic] Philips TAT3509 (Bluetooth#Bluetooth38:d5:7a:be:fc:58-18:9c:2c:e2:ad:64)
+[LOOKUP] Bluetooth SIG incarcat: 4071 companii.
+[LOOKUP] OUI incarcat: 40765 prefixe.
+[DB] Istoric incarcat: 33 dispozitive.
+[DB] Salvat in D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\devices_db.json
+[PASIV] Finalizat in 82 ms | observate: 0, persistate: 0, rotative ignorate: 0.
+[REZULTAT] Dispozitive din istoric (--no-scan): 33 (afisate/analizate: 1)
+[RECON] Reguli incarcate: 9 din vulnerabilities.json
+
+=================================================================
+ REZULTAT TRIAJ PASIV (RECON): 1 candidati din 1 dispozitive
+=================================================================
+[TARGET] LE-Philips TAT3509 (189C2C39063D) | BLE (doar advertising) | RSSI: -56 dBm
+   -> [Probabil] Unauthenticated GATT Exposure or Weak Pairing Protection (CWE-287 / CWE-306)
+      Semnale: GATT accesibil (Success) fara pairing/bonding
+      Pas activ: Enumerare caracteristici GATT cu proprietati Read/Write fara criptare sau downgrade Just Works.
+=================================================================
+[RECON] Candidati salvati in: D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\recon_targets.json
+
+[ACTIVE] Pornire sondare GATT...
+[ACTIVE] Sondare 189C2C39063D (LE-Philips TAT3509)...
+  -> Serviciu GATT: 00001800-0000-1000-8000-00805f9b34fb
+  -> Nume GATT (0x2A00): LE-Philips TAT3509
+  -> Serviciu GATT: 0000ae00-0000-1000-8000-00805f9b34fb
+  -> Serviciu GATT: 80727376-7380-8372-6965-688072797869
+[DB] Salvat in D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\devices_db.json
+[ACTIVE] Sondare GATT finalizata. Istoricul devices_db.json a fost actualizat.
+
+D:\GoCrazy\Licenta\Lectura\alpha01>dotnet run -- --no-scan --target=2CE2AD64 --active-scan
+[CONECTAT] Da, exista 1 dispozitiv(e) conectat(e) la laptop:
+  - [Classic] Philips TAT3509 (Bluetooth#Bluetooth38:d5:7a:be:fc:58-18:9c:2c:e2:ad:64)
+[LOOKUP] Bluetooth SIG incarcat: 4071 companii.
+[LOOKUP] OUI incarcat: 40765 prefixe.
+[DB] Istoric incarcat: 33 dispozitive.
+[DB] Salvat in D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\devices_db.json
+[PASIV] Finalizat in 83 ms | observate: 0, persistate: 0, rotative ignorate: 0.
+[REZULTAT] Dispozitive din istoric (--no-scan): 33 (afisate/analizate: 2)
+[RECON] Reguli incarcate: 9 din vulnerabilities.json
+
+=================================================================
+ REZULTAT TRIAJ PASIV (RECON): 2 candidati din 2 dispozitive
+=================================================================
+[TARGET] Philips TAT3509(BLE) (CD9D2CE2AD64) | BLE (doar advertising) | RSSI: -54 dBm
+   -> [Probabil] Unauthenticated GATT Exposure or Weak Pairing Protection (CWE-287 / CWE-306)
+      Semnale: GATT accesibil (Success) fara pairing/bonding
+      Pas activ: Enumerare caracteristici GATT cu proprietati Read/Write fara criptare sau downgrade Just Works.
+   -> [Candidat] WhisperPair (Google Fast Pair Pairing-State Bypass) (CVE-2025-36911)
+      Semnale: Service UUID: 0000fe2c-0000-1000-8000-00805f9b34fb
+      Pas activ: Sondă activă GATT: Tentativă de citire a caracteristicilor din serviciul 0xFE2C fără ca dispozitivul să fie în mod de pairing. Succesul indică lipsa validării stării.
+[TARGET] (fara nume) (E38A2CE2AD64) | BLE (doar advertising) | RSSI: -45 dBm
+   -> [Candidat] WhisperPair (Google Fast Pair Pairing-State Bypass) (CVE-2025-36911)
+      Semnale: Service UUID: 0000fe2c-0000-1000-8000-00805f9b34fb; Service UUID: FastPair_ModelID:0x1D4000; Google Fast Pair Model ID detectat: FastPair_ModelID:0x1D4000
+      Pas activ: Sondă activă GATT: Tentativă de citire a caracteristicilor din serviciul 0xFE2C fără ca dispozitivul să fie în mod de pairing. Succesul indică lipsa validării stării.
+=================================================================
+[RECON] Candidati salvati in: D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\recon_targets.json
+
+[ACTIVE] Pornire sondare GATT...
+[ACTIVE] Sondare E38A2CE2AD64 ()...
+  -> Acces GATT esuat: Unreachable
+[ACTIVE] Sondare CD9D2CE2AD64 (Philips TAT3509(BLE))...
+  -> Acces GATT esuat: Unreachable
+[DB] Salvat in D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\devices_db.json
+[ACTIVE] Sondare GATT finalizata. Istoricul devices_db.json a fost actualizat.
+
+D:\GoCrazy\Licenta\Lectura\alpha01>dotnet run -- --scan --active-scan
+[CONECTAT] Da, exista 1 dispozitiv(e) conectat(e) la laptop:
+  - [Classic] Philips TAT3509 (Bluetooth#Bluetooth38:d5:7a:be:fc:58-18:9c:2c:e2:ad:64)
+[LOOKUP] Bluetooth SIG incarcat: 4071 companii.
+[LOOKUP] OUI incarcat: 40765 prefixe.
+[DB] Istoric incarcat: 33 dispozitive.
+[DB] Salvat in D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\devices_db.json
+[PASIV] Finalizat in 8127 ms | observate: 56, persistate: 14, rotative ignorate: 42.
+[REZULTAT] Dispozitive in sesiune: 14 (afisate/analizate: 14)
+
+[ACTIVE] Pornire sondare GATT...
+[ACTIVE] Sondare CF9C2CE2AD64 (LE-Philips TAT3509)...
+  -> Serviciu GATT: 00001800-0000-1000-8000-00805f9b34fb
+  -> Nume GATT (0x2A00): Philips TAT3509(BLE)
+  -> Serviciu GATT: 0000fe2c-0000-1000-8000-00805f9b34fb
+  -> [!] Serviciu Google Fast Pair (0xFE2C) detectat. Se testeaza accesul neautentificat...
+  -> [!] SUCCES: Citire neautentificata pe caracteristica fe2c1233-8366-4814-8eb0-01de32100bea
+[ACTIVE] Sondare 54D9C67C47F7 ()...
+  -> Serviciu GATT: 00001800-0000-1000-8000-00805f9b34fb
+  -> Nume GATT (0x2A00): HUAWEI FreeBuds SE 2
+  -> Serviciu GATT: 00001801-0000-1000-8000-00805f9b34fb
+  -> Serviciu GATT: 00007033-0000-1000-8000-00805f9b34fb
+  -> Serviciu GATT: 01000100-0000-1000-8000-009e78563412
+[ACTIVE] Sondare CB975F0B2627 ()...
+  -> Acces GATT esuat: Unreachable
+[ACTIVE] Sondare D0D00326C10D ([TV] Blue1)...
+  -> Acces GATT esuat: Unreachable
+[ACTIVE] Sondare C039370F72F7 (GR-AC_10001_09_72f7_SC)...
+  -> Acces GATT esuat: Unreachable
+[ACTIVE] Sondare 0CE4A032E41C (HUAWEI WATCH GT 2e-41C)...
+  -> Serviciu GATT: 00001800-0000-1000-8000-00805f9b34fb
+  -> Nume GATT (0x2A00): HUAWEI WATCH GT 2e-41C
+  -> Serviciu GATT: 00001801-0000-1000-8000-00805f9b34fb
+  -> Serviciu GATT: 00003802-0000-1000-8000-00805f9b34fb
+  -> Serviciu GATT: 0000180f-0000-1000-8000-00805f9b34fb
+  -> Serviciu GATT: 0000fe86-0000-1000-8000-00805f9b34fb
+  -> Serviciu GATT: 00001812-0000-1000-8000-00805f9b34fb
+[DB] Salvat in D:\GoCrazy\Licenta\Lectura\alpha01\bin\Debug\net10.0-windows10.0.19041.0\devices_db.json
+[ACTIVE] Sondare GATT finalizata. Istoricul devices_db.json a fost actualizat.
+```
+
+### Observații din output
+
+- Buildul reușește (`alpha0.1 net10.0-windows10.0.19041.0`), iar helpul reflectă exact opțiunile noi, inclusiv `--target` și testarea serviciului `0xFE2C`.
+- Scanarea pasivă cu `--scan --debug`: 68 de advertising-uri văzute, 13 adrese stabile persistate, 55 de adrese rotative (RPA/NRPA) ignorate.
+- `--connect="189C2C39063D"` a rulat triajul, dar a raportat **0 candidați**, deoarece `GattAccess` nu era încă populat în acel moment; după sondarea activă, valoarea `Success` a fost salvată în `devices_db.json`.
+- `--target="2C39063D"` confirmă fixul: filtrează, pornește `ReconEngine` și găsește candidatul `WEAK-PAIRING-OR-OPEN-GATT`, afișat ca „Unauthenticated GATT Exposure or Weak Pairing Protection (CWE-287 / CWE-306)”.
+- `--target=2CE2AD64` găsește două dispozitive cu UUID Fast Pair; pe `E38A2CE2AD64` apare și `FastPair_ModelID:0x1D4000`, deci regula `WHISPERPAIR-GFPS` prinde atât UUID-ul, cât și Model ID-ul.
+- În runul final, `dotnet run -- --scan --active-scan` detectează serviciul `0000fe2c-...` pe Philips TAT3509 și **citește cu succes o caracteristică fără pairing** (`fe2c1233-8366-4814-8eb0-01de32100bea`) — confirmare activă pentru WhisperPair.
+- Țintele `Unreachable` apar din istoricul `--no-scan` (dispozitive salvate anterior, dar nu mai sunt în rază).
+
+> Posibilă îmbunătățire de analizat: ordinea curentă e `ReconEngine` → sondare activă, deci triajul nu poate folosi `GattAccess` proaspăt în același run. Mutarea sau duplicarea triajului după `--active-scan` ar elimina dependența de datele salvage din rularea anterioară.
