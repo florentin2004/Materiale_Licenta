@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
@@ -15,6 +16,7 @@ public static class ActiveGattProber
         record.Security ??= new();
         record.Hardware ??= new();
         record.Security.ExposedServices ??= new();
+        record.Security.AuditNotes ??= new();
 
         if (!ulong.TryParse(record.MacAddress, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out ulong btAddress))
         {
@@ -23,7 +25,7 @@ public static class ActiveGattProber
             return;
         }
 
-        // Necesar pentru adrese BLE Random-Static (ex. EAF52CE2AD64)
+        // Necesar pentru adrese BLE Random-Static (ex. D1D32CE2AD64)
         var addressType = string.Equals(record.Advertisement?.AddressKind, "Public", StringComparison.OrdinalIgnoreCase)
             ? BluetoothAddressType.Public
             : BluetoothAddressType.Random;
@@ -65,7 +67,54 @@ public static class ActiveGattProber
                 {
                     await ReadDeviceInformationAsync(service, record.Hardware);
                 }
+                // Google Fast Pair Service (0xFE2C) -> sondă activă neinvazivă (citire neautentificată)
+                else if (service.Uuid.ToString().Contains("fe2c", StringComparison.OrdinalIgnoreCase))
+                {
+                    await ProbeFastPairUnauthenticatedReadAsync(service, record);
+                }
             }
+        }
+    }
+
+    private static async Task ProbeFastPairUnauthenticatedReadAsync(GattDeviceService fastPairService, BluetoothDeviceRecord record)
+    {
+        Console.WriteLine("  -> [!] Serviciu Google Fast Pair (0xFE2C) detectat. Se testeaza accesul neautentificat...");
+
+        var charsResult = await fastPairService.GetCharacteristicsAsync(BluetoothCacheMode.Uncached);
+        if (charsResult.Status != GattCommunicationStatus.Success)
+            return;
+
+        bool unauthenticatedReadSuccess = false;
+
+        foreach (var ch in charsResult.Characteristics)
+        {
+            if (ch.CharacteristicProperties.HasFlag(GattCharacteristicProperties.Read))
+            {
+                try
+                {
+                    var readResult = await ch.ReadValueAsync(BluetoothCacheMode.Uncached);
+                    if (readResult.Status == GattCommunicationStatus.Success)
+                    {
+                        unauthenticatedReadSuccess = true;
+                        Console.WriteLine($"  -> [!] SUCCES: Citire neautentificata pe caracteristica {ch.Uuid}");
+                        break;
+                    }
+                }
+                catch
+                {
+                    // Ignoram erorile individuale de citire si continuam cu urmatoarea caracteristica.
+                }
+            }
+        }
+
+        record.Security.AuditNotes ??= new List<string>();
+        if (unauthenticatedReadSuccess && !record.Security.IsPaired)
+        {
+            record.Security.AuditNotes.Add("CRITIC: Serviciu Fast Pair accesibil fara pairing/bonding. Dispozitivul este un candidat puternic pentru WhisperPair.");
+        }
+        else
+        {
+            record.Security.AuditNotes.Add("INFO: Serviciu Fast Pair prezent, dar accesul este restrictionat sau dispozitivul este deja imperecheat (protejat).");
         }
     }
 

@@ -186,7 +186,8 @@ public class DeviceHistoryStore
             notes.Add("Chipset Airoha observat pasiv - candidat pentru verificare RACE.");
 
         bool fastPair =
-            (record.Advertisement?.ServiceUuids?.Any(u => u.StartsWith("0000fe2c", StringComparison.OrdinalIgnoreCase)) ?? false) ||
+            (record.Advertisement?.ServiceUuids?.Any(u => u.StartsWith("0000fe2c", StringComparison.OrdinalIgnoreCase) ||
+                                                         u.StartsWith("FastPair_ModelID:", StringComparison.OrdinalIgnoreCase)) ?? false) ||
             (record.Security?.ExposedServices?.Any(u => u.StartsWith("0000fe2c", StringComparison.OrdinalIgnoreCase) ||
                                                        u.StartsWith("df21fe2c", StringComparison.OrdinalIgnoreCase)) ?? false);
         if (fastPair)

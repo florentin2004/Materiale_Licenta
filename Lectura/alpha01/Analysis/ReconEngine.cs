@@ -194,6 +194,16 @@ public class ReconEngine
             }
         }
 
+        // Verificare specifica pentru Model ID Fast Pair extras din advertising
+        var modelIdUuid = allUuids.FirstOrDefault(u => u.StartsWith("FastPair_ModelID:", StringComparison.OrdinalIgnoreCase));
+        if (modelIdUuid != null &&
+            (string.Equals(rule.Id, "WHISPERPAIR-GFPS", StringComparison.OrdinalIgnoreCase) ||
+             sig.ServiceUuidPrefixes.Any(p => p.StartsWith("FastPair_ModelID:", StringComparison.OrdinalIgnoreCase))))
+        {
+            matched.Add($"Google Fast Pair Model ID detectat: {modelIdUuid}");
+            strongSignal = true;
+        }
+
         if (sig.CompanyIds.Count > 0)
         {
             foreach (int cid in sig.CompanyIds)

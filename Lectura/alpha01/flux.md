@@ -1123,7 +1123,7 @@ public class PassiveLookupStore
     }
 
     /// <summary>
-    /// Format Wireshark manuf: "OUI<tab>NumeScurt<tab>NumeLung". Pastram numele lung daca exista.
+    /// Format Wireshark manuf: "OUI&lt;tab&gt;NumeScurt&lt;tab&gt;NumeLung". Pastram numele lung daca exista.
     /// </summary>
     private static (string Oui, string Vendor)? ParseOuiLine(string line)
     {
@@ -1381,6 +1381,8 @@ public class ScanOptions
             else if (lower.StartsWith("--target="))
             {
                 o.TargetFilter = a[9..].Trim();
+                // --target filtrează și declanșează triajul (conform mesajului de ajutor).
+                o.Connect = true;
             }
             else if (lower == "--no-prompt") o.NoPrompt = true;
             else if (lower == "--fast") o.Fast = true;
@@ -1449,7 +1451,8 @@ public class ScanOptions
           dotnet run -- --scan=10 --debug
           dotnet run -- --no-scan --connect=2CE2AD64
           dotnet run -- --scan=6 --connect=2CE2AD64 --active-scan
-          dotnet run -- --no-scan --connect="D1D32CE2AD64" --active-scan
+          dotnet run -- --no-scan --connect=D1D32CE2AD64 --active-scan
+          dotnet run -- --no-scan --target=D1D32CE2AD64 --active-scan
         """);
     }
 }
@@ -1709,7 +1712,7 @@ public class Program
         string scope = opts.ScanSeconds > 0 ? "in sesiune" : "din istoric (--no-scan)";
         Console.WriteLine($"[REZULTAT] Dispozitive {scope}: {detectedDevices.Count} (afisate/analizate: {filteredDevices.Count})");
 
-        // 3. Triaj pasiv (ReconEngine) doar cand se cere --connect / --connection
+        // 3. Triaj pasiv (ReconEngine) cand se cere --connect sau --target
         if (opts.Connect)
         {
             var reconEngine = ReconEngine.LoadFromFile(Path.Combine(baseDir, "vulnerabilities.json"));

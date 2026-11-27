@@ -39,7 +39,7 @@ public class Program
         string scope = opts.ScanSeconds > 0 ? "in sesiune" : "din istoric (--no-scan)";
         Console.WriteLine($"[REZULTAT] Dispozitive {scope}: {detectedDevices.Count} (afisate/analizate: {filteredDevices.Count})");
 
-        // 3. Triaj pasiv (ReconEngine) doar cand se cere --connect / --connection
+        // 3. Triaj pasiv (ReconEngine) cand se cere --connect sau --target
         if (opts.Connect)
         {
             var reconEngine = ReconEngine.LoadFromFile(Path.Combine(baseDir, "vulnerabilities.json"));

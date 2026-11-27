@@ -50,6 +50,8 @@ public class ScanOptions
             else if (lower.StartsWith("--target="))
             {
                 o.TargetFilter = a[9..].Trim();
+                // --target filtrează și declanșează triajul (conform mesajului de ajutor).
+                o.Connect = true;
             }
             else if (lower == "--no-prompt") o.NoPrompt = true;
             else if (lower == "--fast") o.Fast = true;
@@ -107,7 +109,7 @@ public class ScanOptions
           --no-scan                Sare peste scanarea BLE (analizeaza doar istoricul din devices_db.json).
           --target=<MAC|Nume>      Filtreaza si analizeaza doar o tinta anume (dupa MAC sau nume).
           --connect[=<filtru>]     Ruleaza triajul pasiv (ReconEngine) si salveaza candidații in recon_targets.json.
-          --active-scan            Ruleaza sondarea activa GATT (enumera serviciile si citeste 0x180A) pe tintele conectabile.
+          --active-scan            Ruleaza sondarea activa GATT (enumera serviciile, citeste 0x180A si testeaza 0xFE2C) pe tintele conectabile.
           --debug                  Afiseaza detalii suplimentare in timpul scanarii si filtrarii.
 
         Optiuni rezervate (parsate, dar inca nefolosite):
@@ -115,10 +117,11 @@ public class ScanOptions
 
         Exemple:
           dotnet run -- --help
-          dotnet run -- --scan=6 --debug
+          dotnet run -- --scan=10 --debug
           dotnet run -- --no-scan --connect=2CE2AD64
           dotnet run -- --scan=6 --connect=2CE2AD64 --active-scan
-          dotnet run -- --no-scan --target=2CE2AD64 --active-scan
+          dotnet run -- --no-scan --connect=D1D32CE2AD64 --active-scan
+          dotnet run -- --no-scan --target=D1D32CE2AD64 --active-scan
         """);
     }
 }

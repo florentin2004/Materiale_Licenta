@@ -4,16 +4,16 @@
     "cve": "CVE-2025-36911",
     "name": "WhisperPair (Google Fast Pair Pairing-State Bypass)",
     "category": "Authentication Bypass / Hijack",
-    "defaultConfidence": "NeevaluabilFaraTestActiv",
+    "defaultConfidence": "Candidat",
     "elevatedConfidence": "Probabil",
     "signals": {
-      "serviceUuidPrefixes": [ "0000fe2c", "df21fe2c" ],
+      "serviceUuidPrefixes": [ "0000fe2c", "df21fe2c", "FastPair_ModelID:" ],
       "companyIds": [ 224 ],
-      "vendorKeywords": [ "Google", "Sony", "JBL", "Jabra", "Marshall", "Soundcore", "OnePlus", "Redmi", "Nothing", "Logitech" ],
+      "vendorKeywords": [ "Google", "Sony", "JBL", "Jabra", "Marshall", "Soundcore", "OnePlus", "Redmi", "Nothing", "Logitech", "Philips" ],
       "namePatterns": []
     },
-    "evidenceRequiredForActive": "Verificare GATT Model ID + scriere neautentificata pe caracteristica Key-based Pairing cand device-ul nu este in pairing mode.",
-    "remediation": "Actualizare firmware la versiunea cu patch-ul Google Fast Pair (validarea starii discoverable/pairing mode)."
+    "evidenceRequiredForActive": "Sondă activă GATT: Tentativă de citire a caracteristicilor din serviciul 0xFE2C fără ca dispozitivul să fie în mod de pairing. Succesul indică lipsa validării stării.",
+    "remediation": "Actualizare firmware la versiunea care validează starea discoverable/pairing mode înainte de a permite interacțiunea cu serviciile Fast Pair."
   },
   {
     "id": "AIROHA-RACE-2025",

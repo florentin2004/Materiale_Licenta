@@ -143,12 +143,20 @@ public class PassiveDetectionService
 
                 foreach (var section in args.Advertisement.DataSections)
                 {
-                    if (section.DataType != 0x16) continue;
+                    if (section.DataType != 0x16 || section.Data.Length < 2) continue;
+
                     byte[] raw = section.Data.ToArray();
-                    if (raw.Length >= 2)
+                    int uuid16 = raw[0] | (raw[1] << 8);
+
+                    // Adaugam UUID-ul standardizat
+                    entry.ServiceUuids.Add($"0000{uuid16:x4}-0000-1000-8000-00805f9b34fb");
+
+                    // Extragem Model ID-ul Google Fast Pair (daca este prezent)
+                    if (uuid16 == 0xFE2C && raw.Length >= 5)
                     {
-                        int uuid16 = raw[0] | (raw[1] << 8);
-                        entry.ServiceUuids.Add($"0000{uuid16:x4}-0000-1000-8000-00805f9b34fb");
+                        // Model ID-ul este stocat pe 3 octeti, little-endian
+                        int modelId = raw[2] | (raw[3] << 8) | (raw[4] << 16);
+                        entry.ServiceUuids.Add($"FastPair_ModelID:0x{modelId:X6}");
                     }
                 }
             }
